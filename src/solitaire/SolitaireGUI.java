@@ -42,7 +42,9 @@ public class SolitaireGUI extends Application {
         titulo.setStyle("-fx-text-fill: #E0B0FF;");
         titulo.setAlignment(Pos.CENTER);
 
-        // Agregar todos los paneles a la raíz
+        // Se hacen los panales para el contenedor de la interfaz (raiz o base)
+        // getChildren devuelve los hijos del contenedor. Se utilizó a cambio
+        // de constructor del contenedor.
         raiz.getChildren().addAll(
                 titulo,
                 crearPanelSuperior(),
@@ -58,7 +60,54 @@ public class SolitaireGUI extends Application {
         actualizarPantalla();
     }
 
+    // EL PANEL PARA EL MAZO
+    private HBox crearPanelSuperior() {
+        HBox panel = new HBox(15);
+        panel.setPadding(new Insets(8));
+        panel.setAlignment(Pos.CENTER);
+        panel.setStyle("-fx-background-color: rgba(124, 77, 255, 0.2); -fx-border-color: #7C4DFF; " +
+                "-fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;");
+
+        // ETIQUETAS PARA EL MAZO Y EL DECARTE
+        Label etiquetaMazoLabel = new Label("Mazo:");
+        etiquetaMazoLabel.setStyle("-fx-text-fill: #E0B0FF; -fx-font-size: 11; -fx-font-weight: bold;");
+
+        etiquetaMazo = crearEtiquetaCarta("M");
+
+        Label etiquetaDescarteLabel = new Label("Descarte:");
+        etiquetaDescarteLabel.setStyle("-fx-text-fill: #E0B0FF; -fx-font-size: 11; -fx-font-weight: bold;");
+
+        etiquetaDescarte = crearEtiquetaCarta("D");
+
+        panel.getChildren().addAll(
+                etiquetaMazoLabel,
+                etiquetaMazo,
+                etiquetaDescarteLabel,
+                etiquetaDescarte
+        );
+
+        return panel;
+    }
+
+    /**
+     * Crea una etiqueta para mostrar una carta.
+     */
+    private Label crearEtiquetaCarta(String texto) {
+        Label etiqueta = new Label(texto);
+        etiqueta.setPrefWidth(60);
+        etiqueta.setPrefHeight(75);
+        etiqueta.setAlignment(Pos.CENTER);
+        etiqueta.setWrapText(true);
+        etiqueta.setFont(Font.font("Arial", FontWeight.BOLD, 10));
+        etiqueta.setStyle("-fx-border-color: #7C4DFF; -fx-border-width: 1; -fx-background-color: #FFFFFF; " +
+                "-fx-border-radius: 6; -fx-background-radius: 6;");
+
+        return etiqueta;
+    }
+
     public static void main(String[] args) {
+
+
         launch(args);
     }
 }
