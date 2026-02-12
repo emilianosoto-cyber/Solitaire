@@ -5,10 +5,12 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+
+import java.awt.*;
 
 public class SolitaireMenu extends Application {
 
@@ -18,7 +20,8 @@ public class SolitaireMenu extends Application {
         VBox raiz = new VBox(30);
         raiz.setPadding(new Insets(50));
         raiz.setAlignment(Pos.CENTER);
-        raiz.setStyle("-fx-background-color: linear-gradient(to bottom, #2D1B69, #1A0F3D);");
+        raiz.setStyle("-fx-background-image: url('file:src/imagen/fondo.png'); " + "-fx-background-repeat: no-repeat; " + "-fx-background-position: center; " + "-fx-background-size: cover;");
+
         // Título
         Label titulo = new Label("SOLITARIO");
         titulo.setFont(Font.font("Arial", FontWeight.BOLD, 60));
