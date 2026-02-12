@@ -62,6 +62,7 @@ public class SolitaireGUI extends Application {
 
     // EL PANEL PARA EL MAZO
     private HBox crearPanelSuperior() {
+
         HBox panel = new HBox(15);
         panel.setPadding(new Insets(8));
         panel.setAlignment(Pos.CENTER);
@@ -89,10 +90,8 @@ public class SolitaireGUI extends Application {
         return panel;
     }
 
-    /**
-     * Crea una etiqueta para mostrar una carta.
-     */
     private Label crearEtiquetaCarta(String texto) {
+
         Label etiqueta = new Label(texto);
         etiqueta.setPrefWidth(60);
         etiqueta.setPrefHeight(75);
@@ -103,6 +102,37 @@ public class SolitaireGUI extends Application {
                 "-fx-border-radius: 6; -fx-background-radius: 6;");
 
         return etiqueta;
+    }
+
+    private VBox crearPanelPilasFundacion() {
+
+        VBox panel = new VBox(6);
+        panel.setPadding(new Insets(8));
+        panel.setStyle("-fx-background-color: rgba(124, 77, 255, 0.2); -fx-border-color: #7C4DFF; " +
+                "-fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;");
+
+        // Título
+        Label titulo = new Label("Fundaciones");
+        titulo.setFont(Font.font("Arial", FontWeight.BOLD, 11));
+        titulo.setStyle("-fx-text-fill: #E0B0FF;");
+
+        // Caja o apartado para las fundaciones
+        HBox cajaPilasFundacion = new HBox(8);
+        cajaPilasFundacion.setPadding(new Insets(6));
+        cajaPilasFundacion.setAlignment(Pos.CENTER);
+
+        //Pilas de funcaicon
+        etiquetasPilasFundacion = new Label[4];
+        for (int i = 0; i < 4; i++) {
+
+            etiquetasPilasFundacion[i] = crearEtiquetaCarta("F" + (i + 1));
+            cajaPilasFundacion.getChildren().add(etiquetasPilasFundacion[i]);
+
+        }
+
+        panel.getChildren().addAll(titulo, cajaPilasFundacion);
+
+        return panel;
     }
 
     public static void main(String[] args) {
