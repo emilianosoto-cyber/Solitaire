@@ -295,6 +295,112 @@ public class SolitaireGUI extends Application {
         return combo;
     }
 
+    /**
+     * Actualiza la pantalla con el estado actual del juego.
+     */
+    private void actualizarPantalla() {
+        try {
+            actualizarMazo();
+            actualizarDescarte();
+            actualizarFundaciones();
+            actualizarColumnas();
+
+            if (juego.isGameOver()) {
+                mostrarVictoria();
+            }
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Actualiza la visualización del mazo.
+     */
+    private void actualizarMazo() {
+        DeckOfCards.DrawPile mazo = juego.getDrawPile();
+        if (mazo.hayCartas()) {
+            etiquetaMazo.setText(mazo.toString());
+            etiquetaMazo.setStyle("-fx-border-color: #7C4DFF; -fx-border-width: 1; " +
+                    "-fx-background-color: #CCFFCC; -fx-border-radius: 6; -fx-background-radius: 6;");
+        } else {
+            etiquetaMazo.setText("Vacío");
+            etiquetaMazo.setStyle("-fx-border-color: #7C4DFF; -fx-border-width: 1; " +
+                    "-fx-background-color: #CCCCCC; -fx-border-radius: 6; -fx-background-radius: 6;");
+        }
+    }
+
+    /**
+     * Actualiza la visualización del descarte.
+     */
+    private void actualizarDescarte() {
+        DeckOfCards.WastePile descarte = juego.getWastePile();
+        CartaInglesa cartaDescarte = descarte.verCarta();
+
+        if (cartaDescarte != null) {
+            etiquetaDescarte.setText(cartaDescarte.toString());
+            etiquetaDescarte.setStyle("-fx-border-color: #7C4DFF; -fx-border-width: 1; " +
+                    "-fx-background-color: #FFFFCC; -fx-border-radius: 6; -fx-background-radius: 6;");
+        } else {
+            etiquetaDescarte.setText("Vacío");
+            etiquetaDescarte.setStyle("-fx-border-color: #7C4DFF; -fx-border-width: 1; " +
+                    "-fx-background-color: #CCCCCC; -fx-border-radius: 6; -fx-background-radius: 6;");
+        }
+    }
+
+    /**
+     * Actualiza la visualización de las fundaciones.
+     */
+    private void actualizarFundaciones() {
+        String estadoJuego = juego.toString();
+        String[] lineas = estadoJuego.split("\n");
+        int indicePila = 0;
+        boolean enPilas = false;
+
+        for (String linea : lineas) {
+            if (linea.equals("Foundation")) {
+                enPilas = true;
+                continue;
+            }
+            if (linea.equals("Tableaux") || linea.equals("Waste")) {
+                enPilas = false;
+                break;
+            }
+            if (enPilas && !linea.trim().isEmpty()) {
+                if (indicePila < etiquetasPilasFundacion.length) {
+                    etiquetasPilasFundacion[indicePila].setText(linea);
+                    if (linea.equals("---")) {
+                        etiquetasPilasFundacion[indicePila].setStyle("-fx-border-color: #7C4DFF; " +
+                                "-fx-border-width: 1; -fx-background-color: #FFFFFF; " +
+                                "-fx-border-radius: 6; -fx-background-radius: 6;");
+                    } else {
+                        etiquetasPilasFundacion[indicePila].setStyle("-fx-border-color: #7C4DFF; " +
+                                "-fx-border-width: 1; -fx-background-color: #FFFFCC; " +
+                                "-fx-border-radius: 6; -fx-background-radius: 6;");
+                    }
+                    indicePila++;
+                }
+            }
+        }
+    }
+
+    /**
+     * Actualiza la visualización de las columnas.
+     */
+    private void actualizarColumnas() {
+        java.util.ArrayList<TableauDeck> columnas = juego.getTableau();
+        for (int i = 0; i < columnas.size(); i++) {
+            String textoColumna = columnas.get(i).toString();
+            etiquetasColumnas[i].setText(textoColumna);
+            if (textoColumna.equals("---")) {
+                etiquetasColumnas[i].setStyle("-fx-border-color: #7C4DFF; -fx-border-width: 1; " +
+                        "-fx-background-color: #FFFFFF; -fx-border-radius: 6; -fx-background-radius: 6;");
+            } else {
+                etiquetasColumnas[i].setStyle("-fx-border-color: #7C4DFF; -fx-border-width: 1; " +
+                        "-fx-background-color: #FFCCCC; -fx-border-radius: 6; -fx-background-radius: 6;");
+            }
+        }
+    }
+
     public static void main(String[] args) {
 
         launch(args);
