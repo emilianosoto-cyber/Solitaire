@@ -260,6 +260,41 @@ public class SolitaireGUI extends Application {
         return fila3;
     }
 
+    /**
+     * Crea un botón estilizado con efectos hover.
+     */
+    private javafx.scene.control.Button crearBoton(String texto, String colorNormal, String colorHover, int ancho) {
+        javafx.scene.control.Button boton = new javafx.scene.control.Button(texto);
+        boton.setPrefHeight(28);
+        boton.setPrefWidth(ancho);
+        boton.setFont(Font.font("Arial", FontWeight.BOLD, 10));
+        boton.setStyle("-fx-background-color: " + colorNormal + "; -fx-text-fill: #FFFFFF; " +
+                "-fx-border-radius: 8; -fx-background-radius: 8; -fx-cursor: hand; -fx-padding: 5;");
+
+        boton.setOnMouseEntered(evento -> boton.setStyle("-fx-background-color: " + colorHover + "; " +
+                "-fx-text-fill: #FFFFFF; -fx-border-radius: 8; -fx-background-radius: 8; " +
+                "-fx-cursor: hand; -fx-padding: 5; " +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 8, 0, 0, 3);"));
+
+        boton.setOnMouseExited(evento -> boton.setStyle("-fx-background-color: " + colorNormal + "; " +
+                "-fx-text-fill: #FFFFFF; -fx-border-radius: 8; -fx-background-radius: 8; " +
+                "-fx-cursor: hand; -fx-padding: 5;"));
+
+        return boton;
+    }
+
+    /**
+     * Crea un ComboBox para seleccionar columnas.
+     */
+    private javafx.scene.control.ComboBox<Integer> crearComboBox() {
+        javafx.scene.control.ComboBox<Integer> combo = new javafx.scene.control.ComboBox<>();
+        combo.getItems().addAll(1, 2, 3, 4, 5, 6, 7);
+        combo.setPrefWidth(45);
+        combo.setStyle("-fx-background-color: #5E35B1; -fx-text-fill: #E0B0FF; " +
+                "-fx-border-radius: 5; -fx-padding: 3; -fx-font-size: 9;");
+        return combo;
+    }
+
     public static void main(String[] args) {
 
         launch(args);
