@@ -218,6 +218,48 @@ public class SolitaireGUI extends Application {
         return fila2;
     }
 
+    /**
+     * Crea la tercera fila de controles (ComboBox y botones).
+     */
+    private HBox crearFila3() {
+        HBox fila3 = new HBox(6);
+        fila3.setAlignment(Pos.CENTER);
+
+        // Etiqueta "De:" y ComboBox origen
+        Label l1 = new Label("De:");
+        l1.setStyle("-fx-text-fill: #E0B0FF; -fx-font-size: 10;");
+        comboOrigen = crearComboBox();
+        comboOrigen.setValue(1);
+
+        // Etiqueta "A:" y ComboBox destino
+        Label l2 = new Label("A:");
+        l2.setStyle("-fx-text-fill: #E0B0FF; -fx-font-size: 10;");
+        comboDestino = crearComboBox();
+        comboDestino.setValue(2);
+
+        // Botones de movimiento
+        javafx.scene.control.Button mover = crearBoton("Mover", "#7B1FA2", "#6A1B9A", 60);
+        javafx.scene.control.Button d2c = crearBoton("D→C", "#C2185B", "#AD1457", 60);
+
+        mover.setOnAction(e -> {
+            int origen = comboOrigen.getValue();
+            int destino = comboDestino.getValue();
+            if (origen != destino) {
+                juego.moveTableauToTableau(origen, destino);
+                actualizarPantalla();
+            }
+        });
+
+        d2c.setOnAction(e -> {
+            int destino = comboDestino.getValue();
+            juego.moveWasteToTableau(destino);
+            actualizarPantalla();
+        });
+
+        fila3.getChildren().addAll(l1, comboOrigen, l2, comboDestino, mover, d2c);
+        return fila3;
+    }
+
     public static void main(String[] args) {
 
         launch(args);
