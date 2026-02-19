@@ -11,7 +11,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
-// INTERFAZ GRÁFICA DEL SOLITARIO
+// INTERFAZ GRÁFICA DEL SOLITARIO - TABLERO CLÁSICO
 public class SolitaireGUI extends Application {
     // VARIABLES DEL JUEGO
     private SolitaireGame juego;
@@ -21,8 +21,6 @@ public class SolitaireGUI extends Application {
     private Label[] etiquetasPilasFundacion;
     private Label etiquetaMazo;
     private Label etiquetaDescarte;
-    private javafx.scene.control.ComboBox<Integer> comboOrigen;
-    private javafx.scene.control.ComboBox<Integer> comboDestino;
 
     @Override
     public void start(Stage ventanaPrincipal) {
@@ -30,25 +28,21 @@ public class SolitaireGUI extends Application {
 
         ventanaPrincipal.setTitle("Solitario");
         ventanaPrincipal.setWidth(900);
-        ventanaPrincipal.setHeight(750);
+        ventanaPrincipal.setHeight(700);
 
-        // CREAR CONTENEDOR PRINCIPAL CON TODOS LOS PANELES
-        VBox raiz = new VBox(
-                crearTitulo(),
-                crearPanelSuperior(),
-                crearPanelPilasFundacion(),
-                crearPanelColumnas(),
-                crearPanelControles()
-        );
-
-        raiz.setPadding(new Insets(8));
-        raiz.setSpacing(6);
+        // CREAR CONTENEDOR PRINCIPAL
+        VBox raiz = new VBox(10);
+        raiz.setPadding(new Insets(10));
 
         // CARGAR IMAGEN DE FONDO
-        raiz.setStyle("-fx-background-image: url('file:src/imagen/fondoEmi.png'); " +
-                "-fx-background-repeat: no-repeat; " +
-                "-fx-background-position: center; " +
-                "-fx-background-size: cover;");
+        raiz.setStyle("-fx-background-image: url('file:src/imagen/fondoEmi.png'); " + "-fx-background-repeat: no-repeat; " + "-fx-background-position: center; " + "-fx-background-size: cover;");
+
+        // CREAR PANELES
+        HBox panelSuperior = crearPanelSuperior();
+        HBox panelFundaciones = crearPanelFundaciones();
+        HBox panelTableau = crearPanelTableau();
+
+        raiz.getChildren().addAll(panelSuperior, panelFundaciones, panelTableau);
 
         Scene escena = new Scene(raiz);
         ventanaPrincipal.setScene(escena);
@@ -57,227 +51,100 @@ public class SolitaireGUI extends Application {
         actualizarPantalla();
     }
 
-    // CREAR TÍTULO DE LA INTERFAZ
-    private Label crearTitulo() {
-        Label titulo = new Label("SOLITARIO");
-        titulo.setFont(Font.font("Arial", FontWeight.BOLD, 20));
-        titulo.setStyle("-fx-text-fill: #E0B0FF;");
-        titulo.setAlignment(Pos.CENTER);
-        return titulo;
-    }
-
-    // PANEL CON MAZO Y DESCARTE
+    // PANEL SUPERIOR: MAZO Y DESCARTE
     private HBox crearPanelSuperior() {
-        HBox panel = new HBox(15);
-        panel.setPadding(new Insets(8));
-        panel.setAlignment(Pos.CENTER);
-        panel.setStyle("-fx-background-color: rgba(124, 77, 255, 0.2); -fx-border-color: #7C4DFF; " +
-                "-fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;");
+        HBox panel = new HBox(20);
+        panel.setPadding(new Insets(5));
+        panel.setAlignment(Pos.CENTER_LEFT);
+        panel.setStyle("-fx-background-color: rgba(0, 100, 0, 0.3);");
 
-        Label etiquetaMazoLabel = new Label("Mazo:");
-        etiquetaMazoLabel.setStyle("-fx-text-fill: #E0B0FF; -fx-font-size: 11; -fx-font-weight: bold;");
-
+        // ETIQUETA MAZO
+        VBox cajamazo = new VBox();
+        cajamazo.setAlignment(Pos.CENTER);
+        Label labelMazo = new Label("Mazo");
+        labelMazo.setStyle("-fx-text-fill: #FFFFFF; -fx-font-size: 10; -fx-font-weight: bold;");
         etiquetaMazo = crearEtiquetaCarta("M");
+        cajamazo.getChildren().addAll(labelMazo, etiquetaMazo);
 
-        Label etiquetaDescarteLabel = new Label("Descarte:");
-        etiquetaDescarteLabel.setStyle("-fx-text-fill: #E0B0FF; -fx-font-size: 11; -fx-font-weight: bold;");
-
+        // ETIQUETA DESCARTE
+        VBox cajadescarte = new VBox();
+        cajadescarte.setAlignment(Pos.CENTER);
+        Label labelDescarte = new Label("Descarte");
+        labelDescarte.setStyle("-fx-text-fill: #FFFFFF; -fx-font-size: 10; -fx-font-weight: bold;");
         etiquetaDescarte = crearEtiquetaCarta("D");
+        cajadescarte.getChildren().addAll(labelDescarte, etiquetaDescarte);
 
-        panel.getChildren().addAll(etiquetaMazoLabel, etiquetaMazo, etiquetaDescarteLabel, etiquetaDescarte);
+        panel.getChildren().addAll(cajamazo, cajadescarte);
 
         return panel;
     }
 
-    // PANEL DE PILAS DE FUNDACIÓN
-    private VBox crearPanelPilasFundacion() {
-        VBox panel = new VBox(6);
-        panel.setPadding(new Insets(8));
-        panel.setStyle("-fx-background-color: rgba(124, 77, 255, 0.2); -fx-border-color: #7C4DFF; " +
-                "-fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;");
+    // PANEL DE FUNDACIONES
+    private HBox crearPanelFundaciones() {
+        HBox panel = new HBox(8);
+        panel.setPadding(new Insets(5));
+        panel.setAlignment(Pos.CENTER);
+        panel.setStyle("-fx-background-color: rgba(0, 100, 0, 0.3);");
 
-        Label titulo = new Label("Fundaciones");
-        titulo.setFont(Font.font("Arial", FontWeight.BOLD, 11));
-        titulo.setStyle("-fx-text-fill: #E0B0FF;");
+        Label titulo = new Label("Fundaciones:");
+        titulo.setStyle("-fx-text-fill: #FFFFFF; -fx-font-size: 10; -fx-font-weight: bold;");
 
-        HBox cajaPilasFundacion = new HBox(8);
-        cajaPilasFundacion.setPadding(new Insets(6));
-        cajaPilasFundacion.setAlignment(Pos.CENTER);
-
-        // CREAR 4 PILAS DE FUNDACIÓN
+        // CREAR 4 FUNDACIONES
         etiquetasPilasFundacion = new Label[4];
+        HBox cajaFundaciones = new HBox(8);
+        cajaFundaciones.setAlignment(Pos.CENTER);
+
         for (int i = 0; i < 4; i++) {
-            etiquetasPilasFundacion[i] = crearEtiquetaCarta("F" + (i + 1));
-            cajaPilasFundacion.getChildren().add(etiquetasPilasFundacion[i]);
+            etiquetasPilasFundacion[i] = crearEtiquetaCarta("F");
+            cajaFundaciones.getChildren().add(etiquetasPilasFundacion[i]);
         }
 
-        panel.getChildren().addAll(titulo, cajaPilasFundacion);
+        panel.getChildren().addAll(titulo, cajaFundaciones);
+
         return panel;
     }
 
-    // PANEL DE COLUMNAS
-    private HBox crearPanelColumnas() {
-        HBox panel = new HBox(6);
-        panel.setPadding(new Insets(8));
-        panel.setStyle("-fx-background-color: rgba(124, 77, 255, 0.2); -fx-border-color: #7C4DFF; " +
-                "-fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;");
-        panel.setAlignment(Pos.TOP_CENTER);
+    // PANEL DEL TABLERO: 7 COLUMNAS
+    private HBox crearPanelTableau() {
+        HBox panel = new HBox(8);
+        panel.setPadding(new Insets(5));
+        panel.setAlignment(Pos.CENTER);
+        panel.setStyle("-fx-background-color: rgba(0, 100, 0, 0.5);");
 
         // CREAR 7 COLUMNAS
         etiquetasColumnas = new Label[7];
+
         for (int i = 0; i < 7; i++) {
-            VBox caja = new VBox(3);
-            caja.setAlignment(Pos.TOP_CENTER);
+            VBox columna = new VBox(3);
+            columna.setAlignment(Pos.TOP_CENTER);
+            columna.setPadding(new Insets(5));
+            columna.setStyle("-fx-border-color: #228B22; -fx-border-width: 2; " + "-fx-background-color: rgba(0, 100, 0, 0.2);");
 
-            Label etiqueta = new Label("C" + (i + 1));
-            etiqueta.setFont(Font.font("Arial", FontWeight.BOLD, 9));
-            etiqueta.setStyle("-fx-text-fill: #E0B0FF;");
+            // TÍTULO DE LA COLUMNA
+            Label titulo = new Label("Col " + (i + 1));
+            titulo.setStyle("-fx-text-fill: #FFFFFF; -fx-font-size: 9;");
 
-            etiquetasColumnas[i] = crearEtiquetaCarta("C" + (i + 1));
-            caja.getChildren().addAll(etiqueta, etiquetasColumnas[i]);
-            panel.getChildren().add(caja);
+            // ETIQUETA DE LA CARTA
+            etiquetasColumnas[i] = crearEtiquetaCarta("C");
+
+            columna.getChildren().addAll(titulo, etiquetasColumnas[i]);
+            panel.getChildren().add(columna);
         }
 
         return panel;
     }
 
-    // ETIQUETA PARA MOSTRAR UNA CARTA
+    // CREAR ETIQUETA PARA MOSTRAR CARTA
     private Label crearEtiquetaCarta(String texto) {
         Label etiqueta = new Label(texto);
-        etiqueta.setPrefWidth(60);
-        etiqueta.setPrefHeight(75);
+        etiqueta.setPrefWidth(50);
+        etiqueta.setPrefHeight(70);
         etiqueta.setAlignment(Pos.CENTER);
         etiqueta.setWrapText(true);
-        etiqueta.setFont(Font.font("Arial", FontWeight.BOLD, 10));
-        etiqueta.setStyle("-fx-border-color: #7C4DFF; -fx-border-width: 1; -fx-background-color: #FFFFFF; " +
-                "-fx-border-radius: 6; -fx-background-radius: 6;");
+        etiqueta.setFont(Font.font("Arial", FontWeight.BOLD, 9));
+        etiqueta.setStyle("-fx-border-color: #000000; -fx-border-width: 1; " + "-fx-background-color: #FFFFFF; -fx-border-radius: 4; " + "-fx-background-radius: 4;");
 
         return etiqueta;
-    }
-
-    // PANEL DE CONTROLES DEL JUEGO
-    private VBox crearPanelControles() {
-        VBox panel = new VBox(6);
-        panel.setPadding(new Insets(8));
-        panel.setStyle("-fx-background-color: rgba(124, 77, 255, 0.2); -fx-border-color: #7C4DFF; " +
-                "-fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;");
-
-        Label titulo = new Label("Opciones");
-        titulo.setFont(Font.font("Arial", FontWeight.BOLD, 11));
-        titulo.setStyle("-fx-text-fill: #E0B0FF;");
-
-        HBox fila1 = crearFila1();
-        HBox fila2 = crearFila2();
-        HBox fila3 = crearFila3();
-
-        panel.getChildren().addAll(titulo, fila1, fila2, fila3);
-
-        return panel;
-    }
-
-    // PRIMERA FILA: SACAR Y RECARGAR
-    private HBox crearFila1() {
-        HBox fila1 = new HBox(6);
-        fila1.setAlignment(Pos.CENTER);
-
-        javafx.scene.control.Button sacar = crearBoton("Sacar", "#7C4DFF", "#5E35B1", 80);
-        javafx.scene.control.Button recargar = crearBoton("Recargar", "#FF9800", "#F57C00", 80);
-
-        sacar.setOnAction(e -> { juego.drawCards(); actualizarPantalla(); });
-        recargar.setOnAction(e -> { juego.reloadDrawPile(); actualizarPantalla(); });
-
-        fila1.getChildren().addAll(sacar, recargar);
-        return fila1;
-    }
-
-    // SEGUNDA FILA: MOVIMIENTOS PRINCIPALES
-    private HBox crearFila2() {
-        HBox fila2 = new HBox(6);
-        fila2.setAlignment(Pos.CENTER);
-
-        javafx.scene.control.Button d2p = crearBoton("D→P", "#0288D1", "#0277BD", 60);
-        javafx.scene.control.Button p2p = crearBoton("P→P", "#00897B", "#00695C", 60);
-        javafx.scene.control.Button nuevo = crearBoton("Nuevo", "#FFD700", "#FFA000", 60);
-
-        d2p.setOnAction(e -> { juego.moveWasteToFoundation(); actualizarPantalla(); });
-        p2p.setOnAction(e -> {
-            int origen = comboOrigen.getValue();
-            juego.moveTableauToFoundation(origen);
-            actualizarPantalla();
-        });
-        nuevo.setOnAction(e -> { juego = new SolitaireGame(); actualizarPantalla(); });
-
-        fila2.getChildren().addAll(d2p, p2p, nuevo);
-        return fila2;
-    }
-
-    // TERCERA FILA: MOVIMIENTOS CON COMBOBOX
-    private HBox crearFila3() {
-        HBox fila3 = new HBox(6);
-        fila3.setAlignment(Pos.CENTER);
-
-        Label l1 = new Label("De:");
-        l1.setStyle("-fx-text-fill: #E0B0FF; -fx-font-size: 10;");
-        comboOrigen = crearComboBox();
-        comboOrigen.setValue(1);
-
-        Label l2 = new Label("A:");
-        l2.setStyle("-fx-text-fill: #E0B0FF; -fx-font-size: 10;");
-        comboDestino = crearComboBox();
-        comboDestino.setValue(2);
-
-        javafx.scene.control.Button mover = crearBoton("Mover", "#7B1FA2", "#6A1B9A", 60);
-        javafx.scene.control.Button d2c = crearBoton("D→C", "#C2185B", "#AD1457", 60);
-
-        mover.setOnAction(e -> {
-            int origen = comboOrigen.getValue();
-            int destino = comboDestino.getValue();
-            if (origen != destino) {
-                juego.moveTableauToTableau(origen, destino);
-                actualizarPantalla();
-            }
-        });
-        d2c.setOnAction(e -> {
-            int destino = comboDestino.getValue();
-            juego.moveWasteToTableau(destino);
-            actualizarPantalla();
-        });
-
-        fila3.getChildren().addAll(l1, comboOrigen, l2, comboDestino, mover, d2c);
-        return fila3;
-    }
-
-    // CREAR BOTÓN CON EFECTOS HOVER
-    private javafx.scene.control.Button crearBoton(String texto, String colorNormal, String colorHover, int ancho) {
-        javafx.scene.control.Button boton = new javafx.scene.control.Button(texto);
-        boton.setPrefHeight(28);
-        boton.setPrefWidth(ancho);
-        boton.setFont(Font.font("Arial", FontWeight.BOLD, 10));
-        boton.setStyle("-fx-background-color: " + colorNormal + "; -fx-text-fill: #FFFFFF; " +
-                "-fx-border-radius: 8; -fx-background-radius: 8; -fx-cursor: hand; -fx-padding: 5;");
-
-        // EFECTO AL PASAR RATÓN
-        boton.setOnMouseEntered(evento -> boton.setStyle("-fx-background-color: " + colorHover + "; " +
-                "-fx-text-fill: #FFFFFF; -fx-border-radius: 8; -fx-background-radius: 8; " +
-                "-fx-cursor: hand; -fx-padding: 5; " +
-                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 8, 0, 0, 3);"));
-
-        // EFECTO AL SALIR RATÓN
-        boton.setOnMouseExited(evento -> boton.setStyle("-fx-background-color: " + colorNormal + "; " +
-                "-fx-text-fill: #FFFFFF; -fx-border-radius: 8; -fx-background-radius: 8; " +
-                "-fx-cursor: hand; -fx-padding: 5;"));
-
-        return boton;
-    }
-
-    // COMBOBOX PARA SELECCIONAR COLUMNAS
-    private javafx.scene.control.ComboBox<Integer> crearComboBox() {
-        javafx.scene.control.ComboBox<Integer> combo = new javafx.scene.control.ComboBox<>();
-        combo.getItems().addAll(1, 2, 3, 4, 5, 6, 7);
-        combo.setPrefWidth(45);
-        combo.setStyle("-fx-background-color: #5E35B1; -fx-text-fill: #E0B0FF; " +
-                "-fx-border-radius: 5; -fx-padding: 3; -fx-font-size: 9;");
-        return combo;
     }
 
     // ACTUALIZAR TODA LA INTERFAZ
@@ -300,10 +167,10 @@ public class SolitaireGUI extends Application {
     private void actualizarMazo() {
         if (juego.getDrawPile().hayCartas()) {
             etiquetaMazo.setText(juego.getDrawPile().toString());
-            etiquetaMazo.setStyle("-fx-border-color: #7C4DFF; -fx-border-width: 1; " + "-fx-background-color: #CCFFCC; -fx-border-radius: 6; -fx-background-radius: 6;");
+            etiquetaMazo.setStyle("-fx-border-color: #000000; -fx-border-width: 1; " + "-fx-background-color: #4169E1; -fx-border-radius: 4; " + "-fx-background-radius: 4; -fx-text-fill: #FFFFFF;");
         } else {
-            etiquetaMazo.setText("Vacío");
-            etiquetaMazo.setStyle("-fx-border-color: #7C4DFF; -fx-border-width: 1; " + "-fx-background-color: #CCCCCC; -fx-border-radius: 6; -fx-background-radius: 6;");
+            etiquetaMazo.setText("∅");
+            etiquetaMazo.setStyle("-fx-border-color: #000000; -fx-border-width: 1; " + "-fx-background-color: #CCCCCC; -fx-border-radius: 4; " + "-fx-background-radius: 4;");
         }
     }
 
@@ -313,10 +180,10 @@ public class SolitaireGUI extends Application {
 
         if (cartaDescarte != null) {
             etiquetaDescarte.setText(cartaDescarte.toString());
-            etiquetaDescarte.setStyle("-fx-border-color: #7C4DFF; -fx-border-width: 1; " + "-fx-background-color: #FFFFCC; -fx-border-radius: 6; -fx-background-radius: 6;");
+            etiquetaDescarte.setStyle("-fx-border-color: #000000; -fx-border-width: 1; " + "-fx-background-color: #FFFFFF; -fx-border-radius: 4; " + "-fx-background-radius: 4;");
         } else {
-            etiquetaDescarte.setText("Vacío");
-            etiquetaDescarte.setStyle("-fx-border-color: #7C4DFF; -fx-border-width: 1; " + "-fx-background-color: #CCCCCC; -fx-border-radius: 6; -fx-background-radius: 6;");
+            etiquetaDescarte.setText("∅");
+            etiquetaDescarte.setStyle("-fx-border-color: #000000; -fx-border-width: 1; " + "-fx-background-color: #CCCCCC; -fx-border-radius: 4; " + "-fx-background-radius: 4;");
         }
     }
 
@@ -340,13 +207,9 @@ public class SolitaireGUI extends Application {
                 if (indicePila < etiquetasPilasFundacion.length) {
                     etiquetasPilasFundacion[indicePila].setText(linea);
                     if (linea.equals("---")) {
-                        etiquetasPilasFundacion[indicePila].setStyle("-fx-border-color: #7C4DFF; " +
-                                "-fx-border-width: 1; -fx-background-color: #FFFFFF; " +
-                                "-fx-border-radius: 6; -fx-background-radius: 6;");
+                        etiquetasPilasFundacion[indicePila].setStyle("-fx-border-color: #000000; " + "-fx-border-width: 1; -fx-background-color: #FFFFFF; " + "-fx-border-radius: 4; -fx-background-radius: 4;");
                     } else {
-                        etiquetasPilasFundacion[indicePila].setStyle("-fx-border-color: #7C4DFF; " +
-                                "-fx-border-width: 1; -fx-background-color: #FFFFCC; " +
-                                "-fx-border-radius: 6; -fx-background-radius: 6;");
+                        etiquetasPilasFundacion[indicePila].setStyle("-fx-border-color: #000000; " + "-fx-border-width: 1; -fx-background-color: #FFFFCC; " + "-fx-border-radius: 4; -fx-background-radius: 4;");
                     }
                     indicePila++;
                 }
@@ -361,11 +224,9 @@ public class SolitaireGUI extends Application {
             String textoColumna = columnas.get(i).toString();
             etiquetasColumnas[i].setText(textoColumna);
             if (textoColumna.equals("---")) {
-                etiquetasColumnas[i].setStyle("-fx-border-color: #7C4DFF; -fx-border-width: 1; " +
-                        "-fx-background-color: #FFFFFF; -fx-border-radius: 6; -fx-background-radius: 6;");
+                etiquetasColumnas[i].setStyle("-fx-border-color: #000000; -fx-border-width: 1; " + "-fx-background-color: #FFFFFF; -fx-border-radius: 4; " + "-fx-background-radius: 4;");
             } else {
-                etiquetasColumnas[i].setStyle("-fx-border-color: #7C4DFF; -fx-border-width: 1; " +
-                        "-fx-background-color: #FFCCCC; -fx-border-radius: 6; -fx-background-radius: 6;");
+                etiquetasColumnas[i].setStyle("-fx-border-color: #000000; -fx-border-width: 1; " + "-fx-background-color: #FFFFFF; -fx-border-radius: 4; " + "-fx-background-radius: 4;");
             }
         }
     }
@@ -378,8 +239,7 @@ public class SolitaireGUI extends Application {
         VBox vbox = new VBox(15);
         vbox.setPadding(new Insets(30));
         vbox.setAlignment(Pos.CENTER);
-        vbox.setStyle("-fx-background-color: linear-gradient(to bottom, #FFD700, #FFA000); " +
-                "-fx-border-radius: 15; -fx-background-radius: 15;");
+        vbox.setStyle("-fx-background-color: linear-gradient(to bottom, #FFD700, #FFA000);");
 
         // TÍTULO
         Label titulo = new Label("¡GANASTE!");
@@ -393,16 +253,15 @@ public class SolitaireGUI extends Application {
 
         // BOTÓN CERRAR
         javafx.scene.control.Button cerrar = new javafx.scene.control.Button("Cerrar");
-        cerrar.setPrefWidth(120);
-        cerrar.setPrefHeight(40);
+        cerrar.setPrefWidth(100);
+        cerrar.setPrefHeight(35);
         cerrar.setFont(Font.font("Arial", FontWeight.BOLD, 12));
-        cerrar.setStyle("-fx-background-color: #2D1B69; -fx-text-fill: #E0B0FF; " +
-                "-fx-border-radius: 8; -fx-background-radius: 8; -fx-cursor: hand;");
+        cerrar.setStyle("-fx-background-color: #2D1B69; -fx-text-fill: #E0B0FF; " + "-fx-border-radius: 5; -fx-background-radius: 5;");
         cerrar.setOnAction(e -> victoria.close());
 
         vbox.getChildren().addAll(titulo, mensaje, cerrar);
 
-        Scene scene = new Scene(vbox, 350, 250);
+        Scene scene = new Scene(vbox, 300, 200);
         victoria.setScene(scene);
         victoria.show();
     }
