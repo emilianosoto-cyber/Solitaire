@@ -401,6 +401,45 @@ public class SolitaireGUI extends Application {
         }
     }
 
+    /**
+     * Muestra la ventana de victoria.
+     */
+    private void mostrarVictoria() {
+        Stage victoria = new Stage();
+        victoria.setTitle("¡Victoria!");
+
+        VBox vbox = new VBox(15);
+        vbox.setPadding(new Insets(30));
+        vbox.setAlignment(Pos.CENTER);
+        vbox.setStyle("-fx-background-color: linear-gradient(to bottom, #FFD700, #FFA000); " +
+                "-fx-border-radius: 15; -fx-background-radius: 15;");
+
+        // Título
+        Label titulo = new Label("¡GANASTE!");
+        titulo.setFont(Font.font("Arial", FontWeight.BOLD, 36));
+        titulo.setStyle("-fx-text-fill: #2D1B69;");
+
+        // Mensaje
+        Label mensaje = new Label("¡Felicidades!");
+        mensaje.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+        mensaje.setStyle("-fx-text-fill: #000000;");
+
+        // Botón cerrar
+        javafx.scene.control.Button cerrar = new javafx.scene.control.Button("Cerrar");
+        cerrar.setPrefWidth(120);
+        cerrar.setPrefHeight(40);
+        cerrar.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+        cerrar.setStyle("-fx-background-color: #2D1B69; -fx-text-fill: #E0B0FF; " +
+                "-fx-border-radius: 8; -fx-background-radius: 8; -fx-cursor: hand;");
+        cerrar.setOnAction(e -> victoria.close());
+
+        vbox.getChildren().addAll(titulo, mensaje, cerrar);
+
+        Scene scene = new Scene(vbox, 350, 250);
+        victoria.setScene(scene);
+        victoria.show();
+    }
+
     public static void main(String[] args) {
 
         launch(args);
