@@ -25,23 +25,23 @@ public class SolitaireMenu extends Application {
         // Título
         Label titulo = new Label("SOLITARIO");
         titulo.setFont(Font.font("Arial", FontWeight.BOLD, 60));
-        titulo.setStyle("-fx-text-fill: #E0B0FF; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 10, 0, 0, 2);");
+        titulo.setStyle("-fx-text-fill: #D9BF4E; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 10, 0, 0, 2);");
         // Panel de botones
         VBox panelBotones = new VBox(20);
         panelBotones.setAlignment(Pos.CENTER);
         panelBotones.setPadding(new Insets(30));
-        panelBotones.setStyle("-fx-background-color: rgba(93, 39, 175, 0.3); -fx-border-color: #7C4DFF; " + "-fx-border-width: 2; -fx-border-radius: 20; -fx-background-radius: 20;");
+        panelBotones.setStyle("-fx-background-color: rgba(93, 39, 175, 0.3); -fx-border-color: #D9BF4E; " + "-fx-border-width: 2; -fx-border-radius: 20; -fx-background-radius: 20;");
 
         // Botón de Nueva Partida
-        Button botonNueva = crearBoton("Nueva Partida", "#7C4DFF", "#5E35B1");
+        Button botonNueva = crearBoton("Nueva Partida", "#D9BF4E", "#5E35B1");
         botonNueva.setOnAction(evento -> {
             SolitaireGUI gui = new SolitaireGUI();
             gui.start(new Stage());
             ventanaPrincipal.close();
         });
 
-        // Botón deSalir
-        Button botonSalir = crearBoton("Salir", "#512DA8", "#311B92");
+        // Botón de Salir
+        Button botonSalir = crearBoton("Salir", "#D9BF4E", "#311B92");
         botonSalir.setOnAction(evento -> System.exit(0));
         panelBotones.getChildren().addAll(botonNueva, botonSalir);
         raiz.getChildren().addAll(titulo, panelBotones);

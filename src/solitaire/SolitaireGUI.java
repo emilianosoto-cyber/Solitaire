@@ -43,10 +43,12 @@ public class SolitaireGUI extends Application {
         // Se hacen los panales para el contenedor de la interfaz (raiz o base)
         // getChildren devuelve los hijos del contenedor. Se utilizó a cambio
         // de constructor del contenedor.
-        raiz.getChildren().addAll(titulo, crearPanelSuperior(), crearPanelPilasFundacion());
+        raiz.getChildren().addAll(titulo, crearPanelSuperior(), crearPanelPilasFundacion(), crearPanelColumnas(), crearPanelControles());
         Scene escena = new Scene(raiz);
         ventanaPrincipal.setScene(escena);
         ventanaPrincipal.show();
+
+        actualizarPantalla();
 
     }
 
@@ -131,7 +133,7 @@ public class SolitaireGUI extends Application {
             caja.setAlignment(Pos.TOP_CENTER);
 
             //TITULO DEL PANEL
-            Label etiqueta = new Label("C" + (i + 1));
+            Label etiqueta = new Label();
             etiqueta.setFont(Font.font("Arial", FontWeight.BOLD, 9));
             etiqueta.setStyle("-fx-text-fill: #E0B0FF;");
 
@@ -139,6 +141,26 @@ public class SolitaireGUI extends Application {
             caja.getChildren().addAll(etiqueta, etiquetasColumnas[i]);
             panel.getChildren().add(caja);
         }
+
+        return panel;
+    }
+
+    // PANEL PARA LOS CONTROLES
+    private VBox crearPanelControles() {
+        VBox panel = new VBox(6);
+        panel.setPadding(new Insets(8));
+        panel.setStyle("-fx-background-color: rgba(124, 77, 255, 0.2); -fx-border-color: #7C4DFF; " + "-fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;");
+
+        Label titulo = new Label("Opciones");
+        titulo.setFont(Font.font("Arial", FontWeight.BOLD, 11));
+        titulo.setStyle("-fx-text-fill: #E0B0FF;");
+
+        //  FILAS PARA LOS CONTROLES
+        HBox fila1 = crearFila1();
+        HBox fila2 = crearFila2();
+        HBox fila3 = crearFila3();
+
+        panel.getChildren().addAll(titulo, fila1, fila2, fila3);
 
         return panel;
     }
