@@ -165,6 +165,28 @@ public class SolitaireGUI extends Application {
         return panel;
     }
 
+    //BOTONES
+    private HBox crearFila1() {
+        HBox fila1 = new HBox(6);
+        fila1.setAlignment(Pos.CENTER);
+
+        javafx.scene.control.Button sacar = crearBoton("Sacar", "#7C4DFF", "#5E35B1", 80);
+        javafx.scene.control.Button recargar = crearBoton("Recargar", "#FF9800", "#F57C00", 80);
+
+        sacar.setOnAction(e -> {
+            juego.drawCards();
+            actualizarPantalla();
+        });
+
+        recargar.setOnAction(e -> {
+            juego.reloadDrawPile();
+            actualizarPantalla();
+        });
+
+        fila1.getChildren().addAll(sacar, recargar);
+        return fila1;
+    }
+
     public static void main(String[] args) {
 
         launch(args);
