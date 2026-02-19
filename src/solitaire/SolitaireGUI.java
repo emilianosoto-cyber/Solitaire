@@ -187,6 +187,37 @@ public class SolitaireGUI extends Application {
         return fila1;
     }
 
+    /**
+     * Crea la segunda fila de botones (Movimientos principales).
+     */
+    private HBox crearFila2() {
+        HBox fila2 = new HBox(6);
+        fila2.setAlignment(Pos.CENTER);
+
+        javafx.scene.control.Button d2p = crearBoton("D→P", "#0288D1", "#0277BD", 60);
+        javafx.scene.control.Button p2p = crearBoton("P→P", "#00897B", "#00695C", 60);
+        javafx.scene.control.Button nuevo = crearBoton("Nuevo", "#FFD700", "#FFA000", 60);
+
+        d2p.setOnAction(e -> {
+            juego.moveWasteToFoundation();
+            actualizarPantalla();
+        });
+
+        p2p.setOnAction(e -> {
+            int origen = comboOrigen.getValue();
+            juego.moveTableauToFoundation(origen);
+            actualizarPantalla();
+        });
+
+        nuevo.setOnAction(e -> {
+            juego = new SolitaireGame();
+            actualizarPantalla();
+        });
+
+        fila2.getChildren().addAll(d2p, p2p, nuevo);
+        return fila2;
+    }
+
     public static void main(String[] args) {
 
         launch(args);
