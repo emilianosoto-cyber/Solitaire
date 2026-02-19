@@ -5,136 +5,111 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
-/**
- * MENÚ PRINCIPAL DEL SOLITARIO
- */
 public class SolitaireMenu extends Application {
 
     @Override
     public void start(Stage ventanaPrincipal) {
-        // CREAR CONTENEDOR PRINCIPAL
-        VBox raiz = new VBox(20);
-        raiz.setPadding(new Insets(50));
-        raiz.setAlignment(Pos.CENTER);
+        // Root principal con fondo de color sólido
+        StackPane root = new StackPane();
+        root.setStyle("-fx-background-color: linear-gradient(to bottom, #005522, #003311);");
 
-        // CARGAR IMAGEN DE FONDO
-        raiz.setStyle(
-                "-fx-background-image: url('file:src/imagen/fondoEmi.png'); " +
-                        "-fx-background-repeat: no-repeat; " +
-                        "-fx-background-position: center; " +
-                        "-fx-background-size: cover;"
-        );
+        // Contenedor vertical para título + panel de botones
+        VBox contenido = new VBox(25);
+        contenido.setAlignment(Pos.CENTER);
 
-        // CREAR COMPONENTES
-        VBox logo = crearLogo();
+        Label titulo = new Label("Solitario");
+        titulo.setTextFill(Color.WHITE);
+        titulo.setFont(Font.font("Segoe UI", FontWeight.BOLD, 36));
+        titulo.setEffect(new DropShadow(10, Color.rgb(0, 0, 0, 0.7)));
+
         VBox panelBotones = crearPanelBotones(ventanaPrincipal);
 
-        raiz.getChildren().addAll(logo, panelBotones);
+        contenido.getChildren().addAll(titulo, panelBotones);
+        root.getChildren().add(contenido);
 
-        Scene escena = new Scene(raiz, 600, 500);
+        Scene escena = new Scene(root, 800, 600);
         ventanaPrincipal.setTitle("Solitario - Menú Principal");
         ventanaPrincipal.setScene(escena);
         ventanaPrincipal.show();
     }
 
-    /**
-     * CREAR LOGO CON IMAGEN
-     */
-    private VBox crearLogo() {
-        VBox logoContainer = new VBox();
-        logoContainer.setPrefWidth(200);
-        logoContainer.setPrefHeight(200);
-        logoContainer.setAlignment(Pos.CENTER);
-
-        // CARGAR IMAGEN COMO FONDO
-        logoContainer.setStyle(
-                "-fx-background-image: url('file:src/imagen/fondoal.png'); " +
-                        "-fx-background-repeat: no-repeat; " +
-                        "-fx-background-position: center; " +
-                        "-fx-background-size: contain; " +
-                        "-fx-background-color: transparent;"
-        );
-
-        return logoContainer;
-    }
-
-    /**
-     * CREAR BOTÓN CON EFECTOS
-     */
-    private Button crearBoton(String texto, String colorNormal, String colorHover) {
+    // Crea un botón con estilo simple
+    private Button crearBoton(String texto, String colorIni, String colorFin, String colorHoverIni, String colorHoverFin) {
         Button boton = new Button(texto);
-        boton.setPrefWidth(250);
+        boton.setPrefWidth(260);
         boton.setPrefHeight(60);
-        boton.setFont(Font.font("Arial", FontWeight.BOLD, 18));
+        boton.setFont(Font.font("Segoe UI", FontWeight.BOLD, 18));
+        boton.setTextFill(Color.WHITE);
         boton.setStyle(
-                "-fx-background-color: " + colorNormal + "; " +
-                        "-fx-text-fill: #FFFFFF; " +
-                        "-fx-border-radius: 15; -fx-background-radius: 15; " +
-                        "-fx-cursor: hand; " +
-                        "-fx-padding: 15; -fx-font-size: 18;"
+                "-fx-background-color: linear-gradient(to right, " + colorIni + ", " + colorFin + ");" +
+                        "-fx-background-radius: 30;" +
+                        "-fx-border-radius: 30;" +
+                        "-fx-border-color: rgba(255,255,255,0.35);" +
+                        "-fx-border-width: 1.5;" +
+                        "-fx-cursor: hand;"
         );
 
-        // EFECTO AL PASAR EL RATÓN
-        boton.setOnMouseEntered(evento ->
+        DropShadow sombra = new DropShadow(15, Color.rgb(0, 0, 0, 0.65));
+        boton.setEffect(sombra);
+
+        boton.setOnMouseEntered(e ->
                 boton.setStyle(
-                        "-fx-background-color: " + colorHover + "; " +
-                                "-fx-text-fill: #FFFFFF; " +
-                                "-fx-border-radius: 15; -fx-background-radius: 15; " +
-                                "-fx-cursor: hand; " +
-                                "-fx-padding: 15; -fx-font-size: 18; " +
-                                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 15, 0, 0, 5);"
+                        "-fx-background-color: linear-gradient(to right, " + colorHoverIni + ", " + colorHoverFin + ");" + "-fx-background-radius: 30;" + "-fx-border-radius: 30;" + "-fx-border-color: rgba(255,255,255,0.8);" + "-fx-border-width: 1.5;" + "-fx-cursor: hand;"
                 )
         );
 
-        // EFECTO AL SALIR EL RATÓN
-        boton.setOnMouseExited(evento ->
+        boton.setOnMouseExited(e ->
                 boton.setStyle(
-                        "-fx-background-color: " + colorNormal + "; " +
-                                "-fx-text-fill: #FFFFFF; " +
-                                "-fx-border-radius: 15; -fx-background-radius: 15; " +
-                                "-fx-cursor: hand; " +
-                                "-fx-padding: 15; -fx-font-size: 18;"
+                        "-fx-background-color: linear-gradient(to right, " + colorIni + ", " + colorFin + ");" + "-fx-background-radius: 30;" + "-fx-border-radius: 30;" + "-fx-border-color: rgba(255,255,255,0.35);" + "-fx-border-width: 1.5;" + "-fx-cursor: hand;"
                 )
         );
 
         return boton;
     }
 
-    /**
-     * PANEL CON BOTONES DEL MENÚ
-     */
+    // Panel que contiene los botones del menú
     private VBox crearPanelBotones(Stage ventanaPrincipal) {
         VBox panelBotones = new VBox(20);
         panelBotones.setAlignment(Pos.CENTER);
         panelBotones.setPadding(new Insets(30));
+
         panelBotones.setStyle(
-                "-fx-background-color: rgba(93, 39, 175, 0.5); " +
-                        "-fx-border-color: #7C4DFF; " +
-                        "-fx-border-width: 2; -fx-border-radius: 20; -fx-background-radius: 20;"
+                "-fx-background-color: rgba(0,0,0,0.45);" + "-fx-background-radius: 25;" + "-fx-border-radius: 25;" + "-fx-border-color: rgba(255,255,255,0.3);" + "-fx-border-width: 1.5;"
         );
 
-        // BOTÓN NUEVA PARTIDA
-        Button botonNueva = crearBoton(" Nueva Partida", "#7C4DFF", "#5E35B1");
+        panelBotones.setEffect(new DropShadow(20, Color.rgb(0, 0, 0, 0.7)));
+
+        // Botón Nueva Partida
+        Button botonNueva = crearBoton(
+                "Nueva Partida",
+                "#8E2DE2", "#4A00E0",
+                "#A74CF2", "#5F2DF0"
+        );
         botonNueva.setOnAction(evento -> {
-            // Crear nueva ventana de juego
             Stage ventanaJuego = new Stage();
             SolitaireGUI gui = new SolitaireGUI();
-            Scene escenaJuego = new Scene(gui, 900, 600);
+            Scene escenaJuego = new Scene(gui, 1000, 650);
             ventanaJuego.setTitle("Solitario - Partida");
             ventanaJuego.setScene(escenaJuego);
             ventanaJuego.show();
-
-            // Cerrar menú principal (opcional)
-            ventanaPrincipal.close();
+            ventanaPrincipal.close(); // cerrar menú
         });
 
-        // BOTÓN SALIR
-        Button botonSalir = crearBoton(" Salir", "#512DA8", "#311B92");
+        // Botón Salir
+        Button botonSalir = crearBoton(
+                "Salir",
+                "#FF416C", "#FF4B2B",
+                "#FF6A88", "#FF7A3D"
+        );
         botonSalir.setOnAction(evento -> System.exit(0));
 
         panelBotones.getChildren().addAll(botonNueva, botonSalir);
