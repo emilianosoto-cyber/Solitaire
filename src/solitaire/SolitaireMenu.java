@@ -23,7 +23,12 @@ public class SolitaireMenu extends Application {
         raiz.setAlignment(Pos.CENTER);
 
         // CARGAR IMAGEN DE FONDO
-        raiz.setStyle("-fx-background-image: url('file:src/imagen/fondoEmi.png'); " + "-fx-background-repeat: no-repeat; " + "-fx-background-position: center; " + "-fx-background-size: cover;");
+        raiz.setStyle(
+                "-fx-background-image: url('file:src/imagen/fondoEmi.png'); " +
+                        "-fx-background-repeat: no-repeat; " +
+                        "-fx-background-position: center; " +
+                        "-fx-background-size: cover;"
+        );
 
         // CREAR COMPONENTES
         VBox logo = crearLogo();
@@ -47,7 +52,12 @@ public class SolitaireMenu extends Application {
         logoContainer.setAlignment(Pos.CENTER);
 
         // CARGAR IMAGEN COMO FONDO
-        logoContainer.setStyle("-fx-background-image: url('file:src/imagen/fondoal.png'); " + "-fx-background-repeat: no-repeat; " + "-fx-background-position: center; " + "-fx-background-size: contain; " + "-fx-background-color: transparent;"
+        logoContainer.setStyle(
+                "-fx-background-image: url('file:src/imagen/fondoal.png'); " +
+                        "-fx-background-repeat: no-repeat; " +
+                        "-fx-background-position: center; " +
+                        "-fx-background-size: contain; " +
+                        "-fx-background-color: transparent;"
         );
 
         return logoContainer;
@@ -61,13 +71,36 @@ public class SolitaireMenu extends Application {
         boton.setPrefWidth(250);
         boton.setPrefHeight(60);
         boton.setFont(Font.font("Arial", FontWeight.BOLD, 18));
-        boton.setStyle("-fx-background-color: " + colorNormal + "; -fx-text-fill: #FFFFFF; " + "-fx-border-radius: 15; -fx-background-radius: 15; -fx-cursor: hand; " + "-fx-padding: 15; -fx-font-size: 18;");
+        boton.setStyle(
+                "-fx-background-color: " + colorNormal + "; " +
+                        "-fx-text-fill: #FFFFFF; " +
+                        "-fx-border-radius: 15; -fx-background-radius: 15; " +
+                        "-fx-cursor: hand; " +
+                        "-fx-padding: 15; -fx-font-size: 18;"
+        );
 
         // EFECTO AL PASAR EL RATÓN
-        boton.setOnMouseEntered(evento -> boton.setStyle("-fx-background-color: " + colorHover + "; " + "-fx-text-fill: #FFFFFF; -fx-border-radius: 15; -fx-background-radius: 15; " + "-fx-cursor: hand; -fx-padding: 15; -fx-font-size: 18; " + "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 15, 0, 0, 5);"));
+        boton.setOnMouseEntered(evento ->
+                boton.setStyle(
+                        "-fx-background-color: " + colorHover + "; " +
+                                "-fx-text-fill: #FFFFFF; " +
+                                "-fx-border-radius: 15; -fx-background-radius: 15; " +
+                                "-fx-cursor: hand; " +
+                                "-fx-padding: 15; -fx-font-size: 18; " +
+                                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 15, 0, 0, 5);"
+                )
+        );
 
         // EFECTO AL SALIR EL RATÓN
-        boton.setOnMouseExited(evento -> boton.setStyle("-fx-background-color: " + colorNormal + "; " + "-fx-text-fill: #FFFFFF; -fx-border-radius: 15; -fx-background-radius: 15; " + "-fx-cursor: hand; -fx-padding: 15; -fx-font-size: 18;"));
+        boton.setOnMouseExited(evento ->
+                boton.setStyle(
+                        "-fx-background-color: " + colorNormal + "; " +
+                                "-fx-text-fill: #FFFFFF; " +
+                                "-fx-border-radius: 15; -fx-background-radius: 15; " +
+                                "-fx-cursor: hand; " +
+                                "-fx-padding: 15; -fx-font-size: 18;"
+                )
+        );
 
         return boton;
     }
@@ -79,13 +112,24 @@ public class SolitaireMenu extends Application {
         VBox panelBotones = new VBox(20);
         panelBotones.setAlignment(Pos.CENTER);
         panelBotones.setPadding(new Insets(30));
-        panelBotones.setStyle("-fx-background-color: rgba(93, 39, 175, 0.5); -fx-border-color: #7C4DFF; " + "-fx-border-width: 2; -fx-border-radius: 20; -fx-background-radius: 20;");
+        panelBotones.setStyle(
+                "-fx-background-color: rgba(93, 39, 175, 0.5); " +
+                        "-fx-border-color: #7C4DFF; " +
+                        "-fx-border-width: 2; -fx-border-radius: 20; -fx-background-radius: 20;"
+        );
 
         // BOTÓN NUEVA PARTIDA
         Button botonNueva = crearBoton(" Nueva Partida", "#7C4DFF", "#5E35B1");
         botonNueva.setOnAction(evento -> {
+            // Crear nueva ventana de juego
+            Stage ventanaJuego = new Stage();
             SolitaireGUI gui = new SolitaireGUI();
-            gui.start(new Stage());
+            Scene escenaJuego = new Scene(gui, 900, 600);
+            ventanaJuego.setTitle("Solitario - Partida");
+            ventanaJuego.setScene(escenaJuego);
+            ventanaJuego.show();
+
+            // Cerrar menú principal (opcional)
             ventanaPrincipal.close();
         });
 

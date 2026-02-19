@@ -1,272 +1,378 @@
 package solitaire;
 
 import DeckOfCards.CartaInglesa;
-import javafx.application.Application;
+import DeckOfCards.Palo;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
+import javafx.scene.Cursor;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import javafx.stage.Stage;
 
-// INTERFAZ GRÁFICA DEL SOLITARIO - TABLERO CLÁSICO
-public class SolitaireGUI extends Application {
-    // VARIABLES DEL JUEGO
-    private SolitaireGame juego;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 
-    // VARIABLES DE LA INTERFAZ
-    private Label[] etiquetasColumnas;
-    private Label[] etiquetasPilasFundacion;
-    private Label etiquetaMazo;
-    private Label etiquetaDescarte;
+/**
+ * Versión visual del Solitario usando imágenes de src/imagen/images.
+ */
+public class SolitaireGUI extends BorderPane {
 
-    @Override
-    public void start(Stage ventanaPrincipal) {
-        this.juego = new SolitaireGame();
+    private final SolitaireGame sg;
 
-        ventanaPrincipal.setTitle("Solitario");
-        ventanaPrincipal.setWidth(900);
-        ventanaPrincipal.setHeight(700);
+    private final HBox topRow;
+    private final HBox tableauRow;
 
-        // CREAR CONTENEDOR PRINCIPAL
-        VBox raiz = new VBox(10);
-        raiz.setPadding(new Insets(10));
+    private final StackPane drawPane;
+    private final StackPane wastePane;
+    private final List<StackPane> foundationPanes = new ArrayList<>();
+    private final List<VBox> tableauPanes = new ArrayList<>();
 
-        // CARGAR IMAGEN DE FONDO
-        raiz.setStyle("-fx-background-image: url('file:src/imagen/fondoEmi.png'); " + "-fx-background-repeat: no-repeat; " + "-fx-background-position: center; " + "-fx-background-size: cover;");
+    private final Label mensajeLabel;
 
-        // CREAR PANELES
-        HBox panelSuperior = crearPanelSuperior();
-        HBox panelFundaciones = crearPanelFundaciones();
-        HBox panelTableau = crearPanelTableau();
+    private boolean wasteSeleccionado = false;
 
-        raiz.getChildren().addAll(panelSuperior, panelFundaciones, panelTableau);
+    // Rutas base de imágenes
+    private static final String IMAGES_BASE_PATH = "src/imagen/images/";
 
-        Scene escena = new Scene(raiz);
-        ventanaPrincipal.setScene(escena);
-        ventanaPrincipal.show();
+    public SolitaireGUI() {
+        this.sg = new SolitaireGame();
 
-        actualizarPantalla();
-    }
+        // --------- Fondo tipo tapete (usando imagen si existe) ---------
+        try {
+            Image fondoImg = new Image(new FileInputStream(IMAGES_BASE_PATH + "fondo_mesa.png"));
+            BackgroundImage bgImage = new BackgroundImage(
+                    fondoImg,
+                    BackgroundRepeat.REPEAT,
+                    BackgroundRepeat.REPEAT,
+                    BackgroundPosition.CENTER,
+                    new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, true)
+            );
+            setBackground(new Background(bgImage));
+        } catch (Exception e) {
+            setStyle("-fx-background-color: #0A8A3A;");
+        }
 
-    // PANEL SUPERIOR: MAZO Y DESCARTE
-    private HBox crearPanelSuperior() {
-        HBox panel = new HBox(20);
-        panel.setPadding(new Insets(5));
-        panel.setAlignment(Pos.CENTER_LEFT);
-        panel.setStyle("-fx-background-color: rgba(0, 100, 0, 0.3);");
+        // --------- Fila superior: Draw, Waste, Foundations ---------
+        topRow = new HBox(20);
+        topRow.setPadding(new Insets(15));
+        topRow.setAlignment(Pos.TOP_LEFT);
 
-        // ETIQUETA MAZO
-        VBox cajamazo = new VBox();
-        cajamazo.setAlignment(Pos.CENTER);
-        Label labelMazo = new Label("Mazo");
-        labelMazo.setStyle("-fx-text-fill: #FFFFFF; -fx-font-size: 10; -fx-font-weight: bold;");
-        etiquetaMazo = crearEtiquetaCarta("M");
-        cajamazo.getChildren().addAll(labelMazo, etiquetaMazo);
+        drawPane = crearSlotCarta(true, "DRAW");
+        wastePane = crearSlotCarta(false, "WASTE");
 
-        // ETIQUETA DESCARTE
-        VBox cajadescarte = new VBox();
-        cajadescarte.setAlignment(Pos.CENTER);
-        Label labelDescarte = new Label("Descarte");
-        labelDescarte.setStyle("-fx-text-fill: #FFFFFF; -fx-font-size: 10; -fx-font-weight: bold;");
-        etiquetaDescarte = crearEtiquetaCarta("D");
-        cajadescarte.getChildren().addAll(labelDescarte, etiquetaDescarte);
-
-        panel.getChildren().addAll(cajamazo, cajadescarte);
-
-        return panel;
-    }
-
-    // PANEL DE FUNDACIONES
-    private HBox crearPanelFundaciones() {
-        HBox panel = new HBox(8);
-        panel.setPadding(new Insets(5));
-        panel.setAlignment(Pos.CENTER);
-        panel.setStyle("-fx-background-color: rgba(0, 100, 0, 0.3);");
-
-        Label titulo = new Label("Fundaciones:");
-        titulo.setStyle("-fx-text-fill: #FFFFFF; -fx-font-size: 10; -fx-font-weight: bold;");
-
-        // CREAR 4 FUNDACIONES
-        etiquetasPilasFundacion = new Label[4];
-        HBox cajaFundaciones = new HBox(8);
-        cajaFundaciones.setAlignment(Pos.CENTER);
+        HBox foundationsBox = new HBox(15);
+        foundationsBox.setAlignment(Pos.TOP_RIGHT);
+        foundationsBox.setPrefWidth(650);
 
         for (int i = 0; i < 4; i++) {
-            etiquetasPilasFundacion[i] = crearEtiquetaCarta("F");
-            cajaFundaciones.getChildren().add(etiquetasPilasFundacion[i]);
+            StackPane f = crearSlotCarta(false, "F" + (i + 1));
+            foundationPanes.add(f);
+            foundationsBox.getChildren().add(f);
         }
 
-        panel.getChildren().addAll(titulo, cajaFundaciones);
+        topRow.getChildren().addAll(drawPane, wastePane, foundationsBox);
+        setTop(topRow);
 
-        return panel;
-    }
-
-    // PANEL DEL TABLERO: 7 COLUMNAS
-    private HBox crearPanelTableau() {
-        HBox panel = new HBox(8);
-        panel.setPadding(new Insets(5));
-        panel.setAlignment(Pos.CENTER);
-        panel.setStyle("-fx-background-color: rgba(0, 100, 0, 0.5);");
-
-        // CREAR 7 COLUMNAS
-        etiquetasColumnas = new Label[7];
+        // --------- Fila inferior: 7 columnas de tableau ---------
+        tableauRow = new HBox(15);
+        tableauRow.setPadding(new Insets(10, 15, 15, 15));
+        tableauRow.setAlignment(Pos.TOP_CENTER);
 
         for (int i = 0; i < 7; i++) {
-            VBox columna = new VBox(3);
-            columna.setAlignment(Pos.TOP_CENTER);
-            columna.setPadding(new Insets(5));
-            columna.setStyle("-fx-border-color: #228B22; -fx-border-width: 2; " + "-fx-background-color: rgba(0, 100, 0, 0.2);");
+            VBox col = new VBox(-80); // solapado vertical
+            col.setAlignment(Pos.TOP_CENTER);
+            col.setPrefWidth(100);
+            col.setPadding(new Insets(0, 5, 0, 5));
+            col.setCursor(Cursor.HAND);
+            col.setPickOnBounds(true); // IMPORTANTE: toda la columna recibe clics
+            col.setBackground(new Background(new BackgroundFill(
+                    Color.TRANSPARENT, CornerRadii.EMPTY, Insets.EMPTY
+            )));
 
-            // TÍTULO DE LA COLUMNA
-            Label titulo = new Label("Col " + (i + 1));
-            titulo.setStyle("-fx-text-fill: #FFFFFF; -fx-font-size: 9;");
-
-            // ETIQUETA DE LA CARTA
-            etiquetasColumnas[i] = crearEtiquetaCarta("C");
-
-            columna.getChildren().addAll(titulo, etiquetasColumnas[i]);
-            panel.getChildren().add(columna);
-        }
-
-        return panel;
-    }
-
-    // CREAR ETIQUETA PARA MOSTRAR CARTA
-    private Label crearEtiquetaCarta(String texto) {
-        Label etiqueta = new Label(texto);
-        etiqueta.setPrefWidth(50);
-        etiqueta.setPrefHeight(70);
-        etiqueta.setAlignment(Pos.CENTER);
-        etiqueta.setWrapText(true);
-        etiqueta.setFont(Font.font("Arial", FontWeight.BOLD, 9));
-        etiqueta.setStyle("-fx-border-color: #000000; -fx-border-width: 1; " + "-fx-background-color: #FFFFFF; -fx-border-radius: 4; " + "-fx-background-radius: 4;");
-
-        return etiqueta;
-    }
-
-    // ACTUALIZAR TODA LA INTERFAZ
-    private void actualizarPantalla() {
-        try {
-            actualizarMazo();
-            actualizarDescarte();
-            actualizarFundaciones();
-            actualizarColumnas();
-
-            if (juego.isGameOver()) {
-                mostrarVictoria();
-            }
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-    }
-
-    // ACTUALIZAR VISUALIZACIÓN DEL MAZO
-    private void actualizarMazo() {
-        if (juego.getDrawPile().hayCartas()) {
-            etiquetaMazo.setText(juego.getDrawPile().toString());
-            etiquetaMazo.setStyle("-fx-border-color: #000000; -fx-border-width: 1; " + "-fx-background-color: #4169E1; -fx-border-radius: 4; " + "-fx-background-radius: 4; -fx-text-fill: #FFFFFF;");
-        } else {
-            etiquetaMazo.setText("∅");
-            etiquetaMazo.setStyle("-fx-border-color: #000000; -fx-border-width: 1; " + "-fx-background-color: #CCCCCC; -fx-border-radius: 4; " + "-fx-background-radius: 4;");
-        }
-    }
-
-    // ACTUALIZAR VISUALIZACIÓN DEL DESCARTE
-    private void actualizarDescarte() {
-        CartaInglesa cartaDescarte = juego.getWastePile().verCarta();
-
-        if (cartaDescarte != null) {
-            etiquetaDescarte.setText(cartaDescarte.toString());
-            etiquetaDescarte.setStyle("-fx-border-color: #000000; -fx-border-width: 1; " + "-fx-background-color: #FFFFFF; -fx-border-radius: 4; " + "-fx-background-radius: 4;");
-        } else {
-            etiquetaDescarte.setText("∅");
-            etiquetaDescarte.setStyle("-fx-border-color: #000000; -fx-border-width: 1; " + "-fx-background-color: #CCCCCC; -fx-border-radius: 4; " + "-fx-background-radius: 4;");
-        }
-    }
-
-    // ACTUALIZAR PILAS DE FUNDACIÓN
-    private void actualizarFundaciones() {
-        String estadoJuego = juego.toString();
-        String[] lineas = estadoJuego.split("\n");
-        int indicePila = 0;
-        boolean enPilas = false;
-
-        for (String linea : lineas) {
-            if (linea.equals("Foundation")) {
-                enPilas = true;
-                continue;
-            }
-            if (linea.equals("Tableaux") || linea.equals("Waste")) {
-                enPilas = false;
-                break;
-            }
-            if (enPilas && !linea.trim().isEmpty()) {
-                if (indicePila < etiquetasPilasFundacion.length) {
-                    etiquetasPilasFundacion[indicePila].setText(linea);
-                    if (linea.equals("---")) {
-                        etiquetasPilasFundacion[indicePila].setStyle("-fx-border-color: #000000; " + "-fx-border-width: 1; -fx-background-color: #FFFFFF; " + "-fx-border-radius: 4; -fx-background-radius: 4;");
+            final int tableauIndex = i + 1;
+            col.setOnMouseClicked(event -> {
+                if (event.getButton() == MouseButton.PRIMARY && wasteSeleccionado) {
+                    boolean ok = sg.moveWasteToTableau(tableauIndex);
+                    if (ok) {
+                        mostrarMensaje("Waste → Tableau " + tableauIndex);
                     } else {
-                        etiquetasPilasFundacion[indicePila].setStyle("-fx-border-color: #000000; " + "-fx-border-width: 1; -fx-background-color: #FFFFCC; " + "-fx-border-radius: 4; -fx-background-radius: 4;");
+                        mostrarMensaje("Movimiento no permitido.");
                     }
-                    indicePila++;
+                    wasteSeleccionado = false;
+                    resaltarWaste(false);
+                    actualizarVista();
+                }
+            });
+
+            tableauPanes.add(col);
+            tableauRow.getChildren().add(col);
+        }
+
+        setCenter(tableauRow);
+
+        // --------- Barra inferior de mensaje ---------
+        mensajeLabel = new Label("Juego iniciado.");
+        mensajeLabel.setTextFill(Color.WHITE);
+        mensajeLabel.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+
+        HBox bottomBar = new HBox(mensajeLabel);
+        bottomBar.setPadding(new Insets(8, 15, 10, 15));
+        bottomBar.setAlignment(Pos.CENTER_LEFT);
+        bottomBar.setStyle(
+                "-fx-background-color: rgba(0,0,0,0.35);" +
+                        "-fx-border-color: rgba(255,255,255,0.25);" +
+                        "-fx-border-width: 1 0 0 0;"
+        );
+        setBottom(bottomBar);
+
+        // --------- Eventos básicos ---------
+
+        // Draw: robar cartas
+        drawPane.setOnMouseClicked(event -> {
+            if (event.getButton() == MouseButton.PRIMARY) {
+                sg.drawCards();
+                mostrarMensaje("Robando cartas...");
+                wasteSeleccionado = false;
+                resaltarWaste(false);
+                actualizarVista();
+            }
+        });
+
+        // Waste:
+        //  - clic izq: seleccionar/deseleccionar para mover a Tableau
+        //  - clic der: intentar mover a Foundation (As o siguiente carta válida)
+        wastePane.setOnMouseClicked(event -> {
+            if (event.getButton() == MouseButton.PRIMARY) {
+                wasteSeleccionado = !wasteSeleccionado;
+                if (wasteSeleccionado) {
+                    mostrarMensaje("Waste seleccionado. Clic en un Tableau para mover.");
+                    resaltarWaste(true);
+                } else {
+                    mostrarMensaje("Selección cancelada.");
+                    resaltarWaste(false);
+                }
+            } else if (event.getButton() == MouseButton.SECONDARY) {
+                boolean ok = sg.moveWasteToFoundation();
+                if (ok) {
+                    mostrarMensaje("Waste → Foundation");
+                } else {
+                    mostrarMensaje("Movimiento a Foundation no permitido.");
+                }
+                wasteSeleccionado = false;
+                resaltarWaste(false);
+                actualizarVista();
+            }
+        });
+
+        actualizarVista();
+    }
+
+    // --------- Creación de slots y cartas ---------
+
+    private StackPane crearSlotCarta(boolean draw, String textoGuia) {
+        StackPane slot = new StackPane();
+        slot.setPrefSize(90, 120);
+        slot.setMaxSize(90, 120);
+        slot.setMinSize(90, 120);
+
+        slot.setBorder(new Border(new BorderStroke(
+                Color.rgb(250, 250, 250, 0.85),
+                BorderStrokeStyle.SOLID,
+                new CornerRadii(10),
+                new BorderWidths(2)
+        )));
+        slot.setBackground(new Background(new BackgroundFill(
+                Color.rgb(0, 0, 0, 0.15),
+                new CornerRadii(10),
+                Insets.EMPTY
+        )));
+
+        Label guia = new Label(textoGuia);
+        guia.setTextFill(Color.rgb(230, 230, 230, 0.8));
+        guia.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, 12));
+        slot.getChildren().add(guia);
+
+        if (draw) {
+            slot.setCursor(Cursor.HAND);
+        }
+
+        return slot;
+    }
+
+    private StackPane crearNodoCarta(CartaInglesa carta) {
+        StackPane pane = new StackPane();
+        pane.setPrefSize(90, 120);
+        pane.setMaxSize(90, 120);
+        pane.setMinSize(90, 120);
+
+        String imagePath;
+        if (!carta.isFaceup()) {
+            imagePath = IMAGES_BASE_PATH + "dorso.png";
+        } else {
+            imagePath = IMAGES_BASE_PATH + obtenerNombreImagenCarta(carta);
+        }
+
+        try {
+            Image img = new Image(new FileInputStream(imagePath));
+            ImageView imageView = new ImageView(img);
+            imageView.setFitWidth(90);
+            imageView.setFitHeight(120);
+            imageView.setPreserveRatio(false);
+            pane.getChildren().add(imageView);
+        } catch (FileNotFoundException e) {
+            // Fallback: carta simple de texto
+            pane.setBackground(new Background(new BackgroundFill(
+                    Color.WHITE,
+                    new CornerRadii(10),
+                    Insets.EMPTY
+            )));
+            pane.setBorder(new Border(new BorderStroke(
+                    Color.LIGHTGRAY,
+                    BorderStrokeStyle.SOLID,
+                    new CornerRadii(10),
+                    new BorderWidths(2)
+            )));
+            Label fallback = new Label(
+                    valorComoTexto(carta.getValor()) + paloComoTexto(carta.getPalo())
+            );
+            fallback.setTextFill(carta.getColor().equalsIgnoreCase("rojo") ? Color.RED : Color.BLACK);
+            fallback.setFont(Font.font("Arial", FontWeight.BOLD, 18));
+            pane.getChildren().add(fallback);
+        }
+
+        return pane;
+    }
+
+    private String obtenerNombreImagenCarta(CartaInglesa carta) {
+        String valorTexto = valorComoTexto(carta.getValor()); // A, 2..10, J, Q, K
+        String paloTexto = switch (carta.getPalo()) {
+            case CORAZON -> "Corazon";
+            case DIAMANTE -> "Diamante";
+            case PICA -> "Pica";
+            case TREBOL -> "Trebol";
+        };
+        return valorTexto + paloTexto + ".png";
+    }
+
+    private String valorComoTexto(int valor) {
+        return switch (valor) {
+            case 11 -> "J";
+            case 12 -> "Q";
+            case 13 -> "K";
+            case 14 -> "A";
+            default -> String.valueOf(valor);
+        };
+    }
+
+    private String paloComoTexto(Palo palo) {
+        return switch (palo) {
+            case CORAZON -> "♥";
+            case DIAMANTE -> "♦";
+            case PICA -> "♠";
+            case TREBOL -> "♣";
+        };
+    }
+
+    // --------- Actualización de la vista ---------
+
+    private void actualizarVista() {
+        // Draw
+        drawPane.getChildren().clear();
+        CartaInglesa cartaDraw = sg.getDrawPile().verCarta();
+        if (cartaDraw != null) {
+            cartaDraw.makeFaceDown();
+            drawPane.getChildren().add(crearNodoCarta(cartaDraw));
+        } else {
+            Label guia = new Label("DRAW");
+            guia.setTextFill(Color.rgb(230, 230, 230, 0.7));
+            guia.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, 12));
+            drawPane.getChildren().add(guia);
+        }
+
+        // Waste
+        wastePane.getChildren().clear();
+        CartaInglesa cartaWaste = sg.getWastePile().verCarta();
+        if (cartaWaste != null) {
+            cartaWaste.makeFaceUp();
+            wastePane.getChildren().add(crearNodoCarta(cartaWaste));
+        } else {
+            Label guia = new Label("WASTE");
+            guia.setTextFill(Color.rgb(230, 230, 230, 0.7));
+            guia.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, 12));
+            wastePane.getChildren().add(guia);
+        }
+
+        // Foundations: por ahora solo “slots”; si expones getFoundations() se pueden dibujar cartas reales
+        for (int i = 0; i < foundationPanes.size(); i++) {
+            StackPane pane = foundationPanes.get(i);
+            pane.getChildren().clear();
+            Label guia = new Label("F" + (i + 1));
+            guia.setTextFill(Color.rgb(230, 230, 230, 0.8));
+            guia.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, 12));
+            pane.getChildren().add(guia);
+        }
+
+        // Tableaux
+        for (int i = 0; i < tableauPanes.size(); i++) {
+            VBox col = tableauPanes.get(i);
+            col.getChildren().clear();
+
+            ArrayList<CartaInglesa> cartas = sg.getTableau().get(i).getCards();
+            if (cartas.isEmpty()) {
+                StackPane placeholder = new StackPane();
+                placeholder.setPrefSize(90, 120);
+                placeholder.setMaxSize(90, 120);
+                placeholder.setMinSize(90, 120);
+                placeholder.setBorder(new Border(new BorderStroke(
+                        Color.rgb(230, 230, 230, 0.4),
+                        BorderStrokeStyle.DASHED,
+                        new CornerRadii(10),
+                        new BorderWidths(2)
+                )));
+                placeholder.setBackground(new Background(new BackgroundFill(
+                        Color.rgb(0, 0, 0, 0.1),
+                        new CornerRadii(10),
+                        Insets.EMPTY
+                )));
+                col.getChildren().add(placeholder);
+            } else {
+                for (CartaInglesa c : cartas) {
+                    col.getChildren().add(crearNodoCarta(c));
                 }
             }
         }
-    }
 
-    // ACTUALIZAR COLUMNAS
-    private void actualizarColumnas() {
-        java.util.ArrayList<TableauDeck> columnas = juego.getTableau();
-        for (int i = 0; i < columnas.size(); i++) {
-            String textoColumna = columnas.get(i).toString();
-            etiquetasColumnas[i].setText(textoColumna);
-            if (textoColumna.equals("---")) {
-                etiquetasColumnas[i].setStyle("-fx-border-color: #000000; -fx-border-width: 1; " + "-fx-background-color: #FFFFFF; -fx-border-radius: 4; " + "-fx-background-radius: 4;");
-            } else {
-                etiquetasColumnas[i].setStyle("-fx-border-color: #000000; -fx-border-width: 1; " + "-fx-background-color: #FFFFFF; -fx-border-radius: 4; " + "-fx-background-radius: 4;");
-            }
+        if (sg.isGameOver()) {
+            mostrarMensaje("GAME OVER. ¡Has completado el solitario!");
         }
     }
 
-    // MOSTRAR VENTANA DE VICTORIA
-    private void mostrarVictoria() {
-        Stage victoria = new Stage();
-        victoria.setTitle("¡Victoria!");
-
-        VBox vbox = new VBox(15);
-        vbox.setPadding(new Insets(30));
-        vbox.setAlignment(Pos.CENTER);
-        vbox.setStyle("-fx-background-color: linear-gradient(to bottom, #FFD700, #FFA000);");
-
-        // TÍTULO
-        Label titulo = new Label("¡GANASTE!");
-        titulo.setFont(Font.font("Arial", FontWeight.BOLD, 36));
-        titulo.setStyle("-fx-text-fill: #2D1B69;");
-
-        // MENSAJE
-        Label mensaje = new Label("¡Felicidades!");
-        mensaje.setFont(Font.font("Arial", FontWeight.BOLD, 14));
-        mensaje.setStyle("-fx-text-fill: #000000;");
-
-        // BOTÓN CERRAR
-        javafx.scene.control.Button cerrar = new javafx.scene.control.Button("Cerrar");
-        cerrar.setPrefWidth(100);
-        cerrar.setPrefHeight(35);
-        cerrar.setFont(Font.font("Arial", FontWeight.BOLD, 12));
-        cerrar.setStyle("-fx-background-color: #2D1B69; -fx-text-fill: #E0B0FF; " + "-fx-border-radius: 5; -fx-background-radius: 5;");
-        cerrar.setOnAction(e -> victoria.close());
-
-        vbox.getChildren().addAll(titulo, mensaje, cerrar);
-
-        Scene scene = new Scene(vbox, 300, 200);
-        victoria.setScene(scene);
-        victoria.show();
+    private void mostrarMensaje(String texto) {
+        mensajeLabel.setText(texto);
     }
 
-    public static void main(String[] args) {
-        launch(args);
+    private void resaltarWaste(boolean activo) {
+        if (activo) {
+            wastePane.setBorder(new Border(new BorderStroke(
+                    Color.GOLD,
+                    BorderStrokeStyle.SOLID,
+                    new CornerRadii(10),
+                    new BorderWidths(3)
+            )));
+        } else {
+            wastePane.setBorder(new Border(new BorderStroke(
+                    Color.rgb(250, 250, 250, 0.85),
+                    BorderStrokeStyle.SOLID,
+                    new CornerRadii(10),
+                    new BorderWidths(2)
+            )));
+        }
     }
 }
