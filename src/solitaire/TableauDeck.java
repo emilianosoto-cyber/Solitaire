@@ -61,14 +61,6 @@ public class TableauDeck {
         return cartaConElValorDeseado;
     }
 
-    /**
-     * Agrega una carta volteada al montículo. Sólo la agrega si:
-     * A) es la siguiente carta en la secuencia
-     * B) está vacio y la carta es un Rey
-     *
-     * @param carta que se intenta almancenar
-     * @return true si se pudo guardar la carta, false si no
-     */
     public boolean agregarCarta(CartaInglesa carta) {
         boolean agregado = false;
 
@@ -80,11 +72,6 @@ public class TableauDeck {
         return agregado;
     }
 
-    /**
-     * Obtener la última carta del montículo sin removerla
-     *
-     * @return la carta que está al final, null si estaba vacio
-     */
     CartaInglesa verUltimaCarta() {
         CartaInglesa ultimaCarta = null;
         if (!cartas.isEmpty()) {
@@ -93,11 +80,6 @@ public class TableauDeck {
         return ultimaCarta;
     }
 
-    /**
-     * Remover la última carta del montículo.
-     *
-     * @return la carta que removió, null si estaba vacio
-     */
     CartaInglesa removerUltimaCarta() {
         CartaInglesa ultimaCarta = null;
         if (!cartas.isEmpty()) {
@@ -124,21 +106,12 @@ public class TableauDeck {
         return builder.toString();
     }
 
-    /**
-     * Agrega un bloque de cartas al Tableau si la primera carta de las cartas recibidas
-     * es de color alterno a la última carta del tableau y también es la siguiente.
-     *
-     * @param cartasRecibidas
-     * @return true si se pudo agregar el bloque, false si no
-     */
     public boolean agregarBloqueDeCartas(ArrayList<CartaInglesa> cartasRecibidas) {
         boolean resultado = false;
 
         if (!cartasRecibidas.isEmpty()) {
             CartaInglesa primera = cartasRecibidas.getFirst();
-            // si la primera carta del bloque recibido se puede agregar al tableau actual
             if (sePuedeAgregarCarta(primera)) {
-                // se agrega todo el bloque
                 cartas.addAll(cartasRecibidas);
                 resultado = true;
             }
@@ -146,11 +119,6 @@ public class TableauDeck {
         return resultado;
     }
 
-    /**
-     * Indica si está vacío  el Tableau
-     *
-     * @return true si no tiene cartas restantes, false si tiene cartas.
-     */
     public boolean isEmpty() {
         return cartas.isEmpty();
     }
@@ -171,7 +139,7 @@ public class TableauDeck {
                 }
             }
         } else {
-            // Está vacio el tableau, solo se puede agregar la cara si es rey
+            // Está vacio el tableau, solo se puede agregar la carta si es rey (K)
             if (cartaInicialDePrueba.getValor() == 13) {
                 resultado = true;
             }
@@ -179,10 +147,6 @@ public class TableauDeck {
         return resultado;
     }
 
-    /**
-     * Obtiene la última carta del Tableau sin removerla.
-     * @return última carta, null si no hay cartas
-     */
     public CartaInglesa getUltimaCarta() {
         CartaInglesa ultimaCarta = null;
         if (!cartas.isEmpty()) {
