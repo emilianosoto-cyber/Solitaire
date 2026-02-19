@@ -11,11 +11,12 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
-
+// INTERFAZ GRÁFICA DEL SOLITARIO
 public class SolitaireGUI extends Application {
-
+    // VARIABLES DEL JUEGO
     private SolitaireGame juego;
 
+    // VARIABLES DE LA INTERFAZ
     private Label[] etiquetasColumnas;
     private Label[] etiquetasPilasFundacion;
     private Label etiquetaMazo;
@@ -25,115 +26,110 @@ public class SolitaireGUI extends Application {
 
     @Override
     public void start(Stage ventanaPrincipal) {
-
         this.juego = new SolitaireGame();
+
         ventanaPrincipal.setTitle("Solitario");
         ventanaPrincipal.setWidth(900);
         ventanaPrincipal.setHeight(750);
-        VBox raiz = new VBox(6);
+
+        // CREAR CONTENEDOR PRINCIPAL CON TODOS LOS PANELES
+        VBox raiz = new VBox(
+                crearTitulo(),
+                crearPanelSuperior(),
+                crearPanelPilasFundacion(),
+                crearPanelColumnas(),
+                crearPanelControles()
+        );
+
         raiz.setPadding(new Insets(8));
-        raiz.setStyle("-fx-background-color: linear-gradient(to bottom, #2D1B69, #1A0F3D);");
+        raiz.setSpacing(6);
 
-        // título
-        Label titulo = new Label("SOLITARIO");
-        titulo.setFont(Font.font("Arial", FontWeight.BOLD, 20));
-        titulo.setStyle("-fx-text-fill: #E0B0FF;");
-        titulo.setAlignment(Pos.CENTER);
+        // CARGAR IMAGEN DE FONDO
+        raiz.setStyle("-fx-background-image: url('file:src/imagen/fondoEmi.png'); " +
+                "-fx-background-repeat: no-repeat; " +
+                "-fx-background-position: center; " +
+                "-fx-background-size: cover;");
 
-        // Se hacen los panales para el contenedor de la interfaz (raiz o base)
-        // getChildren devuelve los hijos del contenedor. Se utilizó a cambio
-        // de constructor del contenedor.
-        raiz.getChildren().addAll(titulo, crearPanelSuperior(), crearPanelPilasFundacion(), crearPanelColumnas(), crearPanelControles());
         Scene escena = new Scene(raiz);
         ventanaPrincipal.setScene(escena);
         ventanaPrincipal.show();
 
         actualizarPantalla();
-
     }
 
-    // EL PANEL PARA EL MAZO
-    private HBox crearPanelSuperior() {
+    // CREAR TÍTULO DE LA INTERFAZ
+    private Label crearTitulo() {
+        Label titulo = new Label("SOLITARIO");
+        titulo.setFont(Font.font("Arial", FontWeight.BOLD, 20));
+        titulo.setStyle("-fx-text-fill: #E0B0FF;");
+        titulo.setAlignment(Pos.CENTER);
+        return titulo;
+    }
 
+    // PANEL CON MAZO Y DESCARTE
+    private HBox crearPanelSuperior() {
         HBox panel = new HBox(15);
         panel.setPadding(new Insets(8));
         panel.setAlignment(Pos.CENTER);
-        panel.setStyle("-fx-background-color: rgba(124, 77, 255, 0.2); -fx-border-color: #7C4DFF; " + "-fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;");
+        panel.setStyle("-fx-background-color: rgba(124, 77, 255, 0.2); -fx-border-color: #7C4DFF; " +
+                "-fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;");
 
-        // ETIQUETAS PARA EL MAZO Y EL DECARTE
         Label etiquetaMazoLabel = new Label("Mazo:");
         etiquetaMazoLabel.setStyle("-fx-text-fill: #E0B0FF; -fx-font-size: 11; -fx-font-weight: bold;");
 
         etiquetaMazo = crearEtiquetaCarta("M");
+
         Label etiquetaDescarteLabel = new Label("Descarte:");
         etiquetaDescarteLabel.setStyle("-fx-text-fill: #E0B0FF; -fx-font-size: 11; -fx-font-weight: bold;");
 
         etiquetaDescarte = crearEtiquetaCarta("D");
-        panel.getChildren().addAll(
-                etiquetaMazoLabel,
-                etiquetaMazo,
-                etiquetaDescarteLabel,
-                etiquetaDescarte
-        );
+
+        panel.getChildren().addAll(etiquetaMazoLabel, etiquetaMazo, etiquetaDescarteLabel, etiquetaDescarte);
 
         return panel;
     }
 
-    private Label crearEtiquetaCarta(String texto) {
-
-        Label etiqueta = new Label(texto);
-        etiqueta.setPrefWidth(60);
-        etiqueta.setPrefHeight(75);
-        etiqueta.setAlignment(Pos.CENTER);
-        etiqueta.setWrapText(true);
-        etiqueta.setFont(Font.font("Arial", FontWeight.BOLD, 10));
-        etiqueta.setStyle("-fx-border-color: #7C4DFF; -fx-border-width: 1; -fx-background-color: #FFFFFF; " + "-fx-border-radius: 6; -fx-background-radius: 6;");
-
-        return etiqueta;
-    }
-
+    // PANEL DE PILAS DE FUNDACIÓN
     private VBox crearPanelPilasFundacion() {
-
         VBox panel = new VBox(6);
         panel.setPadding(new Insets(8));
-        panel.setStyle("-fx-background-color: rgba(124, 77, 255, 0.2); -fx-border-color: #7C4DFF; " + "-fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;");
+        panel.setStyle("-fx-background-color: rgba(124, 77, 255, 0.2); -fx-border-color: #7C4DFF; " +
+                "-fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;");
 
-        // Título
         Label titulo = new Label("Fundaciones");
         titulo.setFont(Font.font("Arial", FontWeight.BOLD, 11));
         titulo.setStyle("-fx-text-fill: #E0B0FF;");
-        // Caja o apartado para las fundaciones
+
         HBox cajaPilasFundacion = new HBox(8);
         cajaPilasFundacion.setPadding(new Insets(6));
         cajaPilasFundacion.setAlignment(Pos.CENTER);
 
-        //Pilas de funcaicon
+        // CREAR 4 PILAS DE FUNDACIÓN
         etiquetasPilasFundacion = new Label[4];
         for (int i = 0; i < 4; i++) {
-
-            etiquetasPilasFundacion[i] = crearEtiquetaCarta("" + (i + 1));
+            etiquetasPilasFundacion[i] = crearEtiquetaCarta("F" + (i + 1));
             cajaPilasFundacion.getChildren().add(etiquetasPilasFundacion[i]);
-
         }
 
         panel.getChildren().addAll(titulo, cajaPilasFundacion);
-
         return panel;
     }
 
-    //PANEL PARA LAS COLUMNAS
+    // PANEL DE COLUMNAS
     private HBox crearPanelColumnas() {
         HBox panel = new HBox(6);
         panel.setPadding(new Insets(8));
-        panel.setStyle("-fx-background-color: rgba(124, 77, 255, 0.2); -fx-border-color: #7C4DFF; " + "-fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;");
+        panel.setStyle("-fx-background-color: rgba(124, 77, 255, 0.2); -fx-border-color: #7C4DFF; " +
+                "-fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;");
         panel.setAlignment(Pos.TOP_CENTER);
+
+        // CREAR 7 COLUMNAS
         etiquetasColumnas = new Label[7];
         for (int i = 0; i < 7; i++) {
             VBox caja = new VBox(3);
             caja.setAlignment(Pos.TOP_CENTER);
 
-            //TITULO DEL PANEL
-            Label etiqueta = new Label();
+            Label etiqueta = new Label("C" + (i + 1));
             etiqueta.setFont(Font.font("Arial", FontWeight.BOLD, 9));
             etiqueta.setStyle("-fx-text-fill: #E0B0FF;");
 
@@ -145,17 +141,31 @@ public class SolitaireGUI extends Application {
         return panel;
     }
 
-    // PANEL PARA LOS CONTROLES
+    // ETIQUETA PARA MOSTRAR UNA CARTA
+    private Label crearEtiquetaCarta(String texto) {
+        Label etiqueta = new Label(texto);
+        etiqueta.setPrefWidth(60);
+        etiqueta.setPrefHeight(75);
+        etiqueta.setAlignment(Pos.CENTER);
+        etiqueta.setWrapText(true);
+        etiqueta.setFont(Font.font("Arial", FontWeight.BOLD, 10));
+        etiqueta.setStyle("-fx-border-color: #7C4DFF; -fx-border-width: 1; -fx-background-color: #FFFFFF; " +
+                "-fx-border-radius: 6; -fx-background-radius: 6;");
+
+        return etiqueta;
+    }
+
+    // PANEL DE CONTROLES DEL JUEGO
     private VBox crearPanelControles() {
         VBox panel = new VBox(6);
         panel.setPadding(new Insets(8));
-        panel.setStyle("-fx-background-color: rgba(124, 77, 255, 0.2); -fx-border-color: #7C4DFF; " + "-fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;");
+        panel.setStyle("-fx-background-color: rgba(124, 77, 255, 0.2); -fx-border-color: #7C4DFF; " +
+                "-fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;");
 
         Label titulo = new Label("Opciones");
         titulo.setFont(Font.font("Arial", FontWeight.BOLD, 11));
         titulo.setStyle("-fx-text-fill: #E0B0FF;");
 
-        //  FILAS PARA LOS CONTROLES
         HBox fila1 = crearFila1();
         HBox fila2 = crearFila2();
         HBox fila3 = crearFila3();
@@ -165,7 +175,7 @@ public class SolitaireGUI extends Application {
         return panel;
     }
 
-    //BOTONES
+    // PRIMERA FILA: SACAR Y RECARGAR
     private HBox crearFila1() {
         HBox fila1 = new HBox(6);
         fila1.setAlignment(Pos.CENTER);
@@ -173,23 +183,14 @@ public class SolitaireGUI extends Application {
         javafx.scene.control.Button sacar = crearBoton("Sacar", "#7C4DFF", "#5E35B1", 80);
         javafx.scene.control.Button recargar = crearBoton("Recargar", "#FF9800", "#F57C00", 80);
 
-        sacar.setOnAction(e -> {
-            juego.drawCards();
-            actualizarPantalla();
-        });
-
-        recargar.setOnAction(e -> {
-            juego.reloadDrawPile();
-            actualizarPantalla();
-        });
+        sacar.setOnAction(e -> { juego.drawCards(); actualizarPantalla(); });
+        recargar.setOnAction(e -> { juego.reloadDrawPile(); actualizarPantalla(); });
 
         fila1.getChildren().addAll(sacar, recargar);
         return fila1;
     }
 
-    /**
-     * Crea la segunda fila de botones (Movimientos principales).
-     */
+    // SEGUNDA FILA: MOVIMIENTOS PRINCIPALES
     private HBox crearFila2() {
         HBox fila2 = new HBox(6);
         fila2.setAlignment(Pos.CENTER);
@@ -198,46 +199,33 @@ public class SolitaireGUI extends Application {
         javafx.scene.control.Button p2p = crearBoton("P→P", "#00897B", "#00695C", 60);
         javafx.scene.control.Button nuevo = crearBoton("Nuevo", "#FFD700", "#FFA000", 60);
 
-        d2p.setOnAction(e -> {
-            juego.moveWasteToFoundation();
-            actualizarPantalla();
-        });
-
+        d2p.setOnAction(e -> { juego.moveWasteToFoundation(); actualizarPantalla(); });
         p2p.setOnAction(e -> {
             int origen = comboOrigen.getValue();
             juego.moveTableauToFoundation(origen);
             actualizarPantalla();
         });
-
-        nuevo.setOnAction(e -> {
-            juego = new SolitaireGame();
-            actualizarPantalla();
-        });
+        nuevo.setOnAction(e -> { juego = new SolitaireGame(); actualizarPantalla(); });
 
         fila2.getChildren().addAll(d2p, p2p, nuevo);
         return fila2;
     }
 
-    /**
-     * Crea la tercera fila de controles (ComboBox y botones).
-     */
+    // TERCERA FILA: MOVIMIENTOS CON COMBOBOX
     private HBox crearFila3() {
         HBox fila3 = new HBox(6);
         fila3.setAlignment(Pos.CENTER);
 
-        // Etiqueta "De:" y ComboBox origen
         Label l1 = new Label("De:");
         l1.setStyle("-fx-text-fill: #E0B0FF; -fx-font-size: 10;");
         comboOrigen = crearComboBox();
         comboOrigen.setValue(1);
 
-        // Etiqueta "A:" y ComboBox destino
         Label l2 = new Label("A:");
         l2.setStyle("-fx-text-fill: #E0B0FF; -fx-font-size: 10;");
         comboDestino = crearComboBox();
         comboDestino.setValue(2);
 
-        // Botones de movimiento
         javafx.scene.control.Button mover = crearBoton("Mover", "#7B1FA2", "#6A1B9A", 60);
         javafx.scene.control.Button d2c = crearBoton("D→C", "#C2185B", "#AD1457", 60);
 
@@ -249,7 +237,6 @@ public class SolitaireGUI extends Application {
                 actualizarPantalla();
             }
         });
-
         d2c.setOnAction(e -> {
             int destino = comboDestino.getValue();
             juego.moveWasteToTableau(destino);
@@ -260,9 +247,7 @@ public class SolitaireGUI extends Application {
         return fila3;
     }
 
-    /**
-     * Crea un botón estilizado con efectos hover.
-     */
+    // CREAR BOTÓN CON EFECTOS HOVER
     private javafx.scene.control.Button crearBoton(String texto, String colorNormal, String colorHover, int ancho) {
         javafx.scene.control.Button boton = new javafx.scene.control.Button(texto);
         boton.setPrefHeight(28);
@@ -271,11 +256,13 @@ public class SolitaireGUI extends Application {
         boton.setStyle("-fx-background-color: " + colorNormal + "; -fx-text-fill: #FFFFFF; " +
                 "-fx-border-radius: 8; -fx-background-radius: 8; -fx-cursor: hand; -fx-padding: 5;");
 
+        // EFECTO AL PASAR RATÓN
         boton.setOnMouseEntered(evento -> boton.setStyle("-fx-background-color: " + colorHover + "; " +
                 "-fx-text-fill: #FFFFFF; -fx-border-radius: 8; -fx-background-radius: 8; " +
                 "-fx-cursor: hand; -fx-padding: 5; " +
                 "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 8, 0, 0, 3);"));
 
+        // EFECTO AL SALIR RATÓN
         boton.setOnMouseExited(evento -> boton.setStyle("-fx-background-color: " + colorNormal + "; " +
                 "-fx-text-fill: #FFFFFF; -fx-border-radius: 8; -fx-background-radius: 8; " +
                 "-fx-cursor: hand; -fx-padding: 5;"));
@@ -283,9 +270,7 @@ public class SolitaireGUI extends Application {
         return boton;
     }
 
-    /**
-     * Crea un ComboBox para seleccionar columnas.
-     */
+    // COMBOBOX PARA SELECCIONAR COLUMNAS
     private javafx.scene.control.ComboBox<Integer> crearComboBox() {
         javafx.scene.control.ComboBox<Integer> combo = new javafx.scene.control.ComboBox<>();
         combo.getItems().addAll(1, 2, 3, 4, 5, 6, 7);
@@ -295,9 +280,7 @@ public class SolitaireGUI extends Application {
         return combo;
     }
 
-    /**
-     * Actualiza la pantalla con el estado actual del juego.
-     */
+    // ACTUALIZAR TODA LA INTERFAZ
     private void actualizarPantalla() {
         try {
             actualizarMazo();
@@ -313,43 +296,31 @@ public class SolitaireGUI extends Application {
         }
     }
 
-    /**
-     * Actualiza la visualización del mazo.
-     */
+    // ACTUALIZAR VISUALIZACIÓN DEL MAZO
     private void actualizarMazo() {
-        DeckOfCards.DrawPile mazo = juego.getDrawPile();
-        if (mazo.hayCartas()) {
-            etiquetaMazo.setText(mazo.toString());
-            etiquetaMazo.setStyle("-fx-border-color: #7C4DFF; -fx-border-width: 1; " +
-                    "-fx-background-color: #CCFFCC; -fx-border-radius: 6; -fx-background-radius: 6;");
+        if (juego.getDrawPile().hayCartas()) {
+            etiquetaMazo.setText(juego.getDrawPile().toString());
+            etiquetaMazo.setStyle("-fx-border-color: #7C4DFF; -fx-border-width: 1; " + "-fx-background-color: #CCFFCC; -fx-border-radius: 6; -fx-background-radius: 6;");
         } else {
             etiquetaMazo.setText("Vacío");
-            etiquetaMazo.setStyle("-fx-border-color: #7C4DFF; -fx-border-width: 1; " +
-                    "-fx-background-color: #CCCCCC; -fx-border-radius: 6; -fx-background-radius: 6;");
+            etiquetaMazo.setStyle("-fx-border-color: #7C4DFF; -fx-border-width: 1; " + "-fx-background-color: #CCCCCC; -fx-border-radius: 6; -fx-background-radius: 6;");
         }
     }
 
-    /**
-     * Actualiza la visualización del descarte.
-     */
+    // ACTUALIZAR VISUALIZACIÓN DEL DESCARTE
     private void actualizarDescarte() {
-        DeckOfCards.WastePile descarte = juego.getWastePile();
-        CartaInglesa cartaDescarte = descarte.verCarta();
+        CartaInglesa cartaDescarte = juego.getWastePile().verCarta();
 
         if (cartaDescarte != null) {
             etiquetaDescarte.setText(cartaDescarte.toString());
-            etiquetaDescarte.setStyle("-fx-border-color: #7C4DFF; -fx-border-width: 1; " +
-                    "-fx-background-color: #FFFFCC; -fx-border-radius: 6; -fx-background-radius: 6;");
+            etiquetaDescarte.setStyle("-fx-border-color: #7C4DFF; -fx-border-width: 1; " + "-fx-background-color: #FFFFCC; -fx-border-radius: 6; -fx-background-radius: 6;");
         } else {
             etiquetaDescarte.setText("Vacío");
-            etiquetaDescarte.setStyle("-fx-border-color: #7C4DFF; -fx-border-width: 1; " +
-                    "-fx-background-color: #CCCCCC; -fx-border-radius: 6; -fx-background-radius: 6;");
+            etiquetaDescarte.setStyle("-fx-border-color: #7C4DFF; -fx-border-width: 1; " + "-fx-background-color: #CCCCCC; -fx-border-radius: 6; -fx-background-radius: 6;");
         }
     }
 
-    /**
-     * Actualiza la visualización de las fundaciones.
-     */
+    // ACTUALIZAR PILAS DE FUNDACIÓN
     private void actualizarFundaciones() {
         String estadoJuego = juego.toString();
         String[] lineas = estadoJuego.split("\n");
@@ -383,9 +354,7 @@ public class SolitaireGUI extends Application {
         }
     }
 
-    /**
-     * Actualiza la visualización de las columnas.
-     */
+    // ACTUALIZAR COLUMNAS
     private void actualizarColumnas() {
         java.util.ArrayList<TableauDeck> columnas = juego.getTableau();
         for (int i = 0; i < columnas.size(); i++) {
@@ -401,9 +370,7 @@ public class SolitaireGUI extends Application {
         }
     }
 
-    /**
-     * Muestra la ventana de victoria.
-     */
+    // MOSTRAR VENTANA DE VICTORIA
     private void mostrarVictoria() {
         Stage victoria = new Stage();
         victoria.setTitle("¡Victoria!");
@@ -414,17 +381,17 @@ public class SolitaireGUI extends Application {
         vbox.setStyle("-fx-background-color: linear-gradient(to bottom, #FFD700, #FFA000); " +
                 "-fx-border-radius: 15; -fx-background-radius: 15;");
 
-        // Título
+        // TÍTULO
         Label titulo = new Label("¡GANASTE!");
         titulo.setFont(Font.font("Arial", FontWeight.BOLD, 36));
         titulo.setStyle("-fx-text-fill: #2D1B69;");
 
-        // Mensaje
+        // MENSAJE
         Label mensaje = new Label("¡Felicidades!");
         mensaje.setFont(Font.font("Arial", FontWeight.BOLD, 14));
         mensaje.setStyle("-fx-text-fill: #000000;");
 
-        // Botón cerrar
+        // BOTÓN CERRAR
         javafx.scene.control.Button cerrar = new javafx.scene.control.Button("Cerrar");
         cerrar.setPrefWidth(120);
         cerrar.setPrefHeight(40);
@@ -441,7 +408,6 @@ public class SolitaireGUI extends Application {
     }
 
     public static void main(String[] args) {
-
         launch(args);
     }
 }
