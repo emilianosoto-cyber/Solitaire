@@ -9,14 +9,14 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 
-//Esta clase dibuja el mazo (draw) y el descarte (waste).Solo es la parte visual, la lógica está en SolitaireGame.
-
+// Esta clase dibuja el mazo (draw) y el descarte (waste).
+// Solo es la parte visual, la lógica está en SolitaireGame.
 public class StockWasteView extends HBox{
     private final SolitaireGame game;
     private final StackPane drawPane;
     private final StackPane wastePane;
 
-    // Esta interfaz sirve para avisar a la GUI principal
+    // Esta interfaz sirve para avisar a la GUI principal sobre la selección del Waste
     public interface SelectionListener{
         void onWasteSelected();
         void onWasteDeselected();
@@ -24,9 +24,13 @@ public class StockWasteView extends HBox{
     }
     private final SelectionListener selectionListener;
 
-    public StockWasteView(SolitaireGame game,SelectionListener selectionListener){
+    // Esta acción se ejecuta cuando cambia algo en el juego (para refrescar todo)
+    private final Runnable onCambio;
+
+    public StockWasteView(SolitaireGame game,SelectionListener selectionListener,Runnable onCambio){
         this.game=game;
         this.selectionListener=selectionListener;
+        this.onCambio=onCambio;
 
         setSpacing(20);
         setPadding(new Insets(15));
@@ -44,30 +48,35 @@ public class StockWasteView extends HBox{
     private void configurarEventos(){
         drawPane.setOnMouseClicked(event->{
             if(event.getButton()!=MouseButton.PRIMARY)return;
+
             if(game.getDrawPile().hayCartas()){
+                // Robar cartas del mazo
                 game.drawCards();
             }else{
+                // Si no hay cartas en draw pero sí en waste, recargamos
                 if(game.getWastePile().verCarta()!=null){
                     game.reloadDrawPile();
                     game.drawCards();
                 }
             }
             selectionListener.onWasteDeselected();
-            actualizar();
+            onCambio.run();   // actualiza todo: draw, waste, tableau y foundations
         });
 
         wastePane.setOnMouseClicked(event->{
             if(event.getButton()==MouseButton.PRIMARY){
+                // Seleccionar o deseleccionar Waste
                 if(selectionListener.isWasteSelected()){
                     selectionListener.onWasteDeselected();
                 }else{
                     selectionListener.onWasteSelected();
                 }
-                actualizar();
+                onCambio.run();
             }else if(event.getButton()==MouseButton.SECONDARY){
+                // Intentar mover Waste a Foundation
                 game.moveWasteToFoundation();
                 selectionListener.onWasteDeselected();
-                actualizar();
+                onCambio.run();   // foundation se actualiza y muestra la carta
             }
         });
     }
@@ -105,7 +114,7 @@ public class StockWasteView extends HBox{
         }
     }
 
-    // Crea un hueco visual para una carta (solo borde y texto)
+    // Crea un hueco visual para una carta
     private StackPane crearSlotCarta(boolean draw,String textoGuia){
         StackPane slot=new StackPane();
         slot.setPrefSize(90,120);

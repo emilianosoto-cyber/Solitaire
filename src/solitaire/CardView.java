@@ -53,7 +53,8 @@ public class CardView extends StackPane{
         }
     }
 
-    // Poner o quitar borde dorado cuando la carta está seleccionada
+
+    //BORDE DORADO
     public void setSeleccionada(boolean seleccionada){
         if(seleccionada){
             setBorder(new Border(new BorderStroke(
