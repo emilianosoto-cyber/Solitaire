@@ -54,7 +54,7 @@ public class CardView extends StackPane{
     }
 
 
-    //BORDE DORADO
+    //BORDE DORADO.
     public void setSeleccionada(boolean seleccionada){
         if(seleccionada){
             setBorder(new Border(new BorderStroke(
