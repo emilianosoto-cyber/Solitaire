@@ -9,8 +9,7 @@ import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 
-//Esta clase dibuja las 4 foundations. Solo muestra la última carta de cada foundation.
-
+// Esta clase dibuja las 4 foundations. Solo muestra la última carta de cada foundation.
 public class FoundationView extends HBox{
     private final SolitaireGame game;
     private final ArrayList<StackPane> foundationPanes=new ArrayList<>();
@@ -20,6 +19,8 @@ public class FoundationView extends HBox{
         setSpacing(15);
         setAlignment(Pos.TOP_RIGHT);
         setPadding(new Insets(15));
+        setBackground(new Background(new BackgroundFill(Color.TRANSPARENT,CornerRadii.EMPTY,Insets.EMPTY)));
+        setStyle("-fx-background-color: transparent;");
 
         for(int i=0;i<4;i++){
             StackPane pane=crearSlot("F"+(i+1));
@@ -50,14 +51,13 @@ public class FoundationView extends HBox{
     }
 
     // Crea el hueco visual para una foundation vacía
-    //STACKPANE ES UN CONTENEDOR QUE APILA SUS NODOS UNO ENCIMA DEL OTRO
     private StackPane crearSlot(String texto){
         StackPane slot=new StackPane();
         slot.setPrefSize(90,120);
         slot.setMaxSize(90,120);
         slot.setMinSize(90,120);
-        slot.setBorder(new Border(new BorderStroke(Color.rgb(250,250,250,0.85), BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(2))));
-        slot.setBackground(new Background(new BackgroundFill(Color.rgb(0,0,0,0.15), new CornerRadii(10), Insets.EMPTY)));
+        slot.setBorder(new Border(new BorderStroke(Color.rgb(250,250,250,0.85),BorderStrokeStyle.SOLID,new CornerRadii(10),new BorderWidths(2))));
+        slot.setBackground(new Background(new BackgroundFill(Color.rgb(0,0,0,0.15),new CornerRadii(10),Insets.EMPTY)));
         Label guia=new Label(texto);
         guia.setTextFill(Color.rgb(230,230,230,0.8));
         guia.setStyle("-fx-font-size: 12px; -fx-font-weight: bold;");

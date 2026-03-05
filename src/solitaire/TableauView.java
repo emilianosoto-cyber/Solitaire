@@ -38,10 +38,11 @@ public class TableauView extends ScrollPane{
         row=new HBox(15);
         row.setPadding(new Insets(10,15,15,15));
         row.setAlignment(Pos.TOP_CENTER);
+        row.setBackground(new Background(new BackgroundFill(javafx.scene.paint.Color.TRANSPARENT,CornerRadii.EMPTY,Insets.EMPTY)));
 
         // Creamos las 7 columnas
         for(int i=0;i<7;i++){
-            VBox col=new VBox(-80);
+            VBox col=new VBox(0); // ← LÍNEA MODIFICADA: de -80 a 0, los márgenes se manejan carta por carta
             col.setAlignment(Pos.TOP_CENTER);
             col.setPrefWidth(100);
             col.setPadding(new Insets(0,5,0,5));
@@ -58,7 +59,11 @@ public class TableauView extends ScrollPane{
         setPannable(true);
         setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        setStyle("-fx-background-color: transparent; -fx-background-insets: 0;");
+        setStyle("-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;");
+        setBackground(new Background(new BackgroundFill(javafx.scene.paint.Color.TRANSPARENT,CornerRadii.EMPTY,Insets.EMPTY)));
+        skinProperty().addListener((obs,oldSkin,newSkin)->{
+            lookup(".viewport").setStyle("-fx-background-color: transparent;");
+        });
 
         actualizar();
     }
@@ -76,8 +81,8 @@ public class TableauView extends ScrollPane{
                 placeholder.setPrefSize(90,120);
                 placeholder.setMaxSize(90,120);
                 placeholder.setMinSize(90,120);
-                placeholder.setBorder(new Border(new BorderStroke(javafx.scene.paint.Color.rgb(230,230,230,0.4), BorderStrokeStyle.DASHED, new CornerRadii(10), new BorderWidths(2))));
-                placeholder.setBackground(new Background(new BackgroundFill(javafx.scene.paint.Color.rgb(0,0,0,0.1), new CornerRadii(10), Insets.EMPTY)));
+                placeholder.setBorder(new Border(new BorderStroke(javafx.scene.paint.Color.rgb(230,230,230,0.4),BorderStrokeStyle.DASHED,new CornerRadii(10),new BorderWidths(2))));
+                placeholder.setBackground(new Background(new BackgroundFill(javafx.scene.paint.Color.rgb(0,0,0,0.1),new CornerRadii(10),Insets.EMPTY)));
 
                 final int colIndex=i;
                 placeholder.setOnMouseClicked(event->{
@@ -96,25 +101,30 @@ public class TableauView extends ScrollPane{
                     final int colIndex=i;
                     final int cardIndex=idx;
 
+                    // ← LÍNEAS AGREGADAS: margen dinámico según si la carta está boca arriba o abajo
+                    // La primera carta no tiene margen negativo, las demás sí se solapan
+                    if(idx>0){
+                        VBox.setMargin(nodoCarta,new Insets(
+                                c.isFaceup()?-65:-100,0,0,0));
+                    }
+
                     // Cursor encima de la carta y controlador de los clics
                     nodoCarta.setCursor(c.isFaceup()?Cursor.HAND:Cursor.DEFAULT);
                     if(c.isFaceup()){
                         nodoCarta.setOnMouseClicked(event->{
                             if(event.getButton()==MouseButton.PRIMARY){
-                                //colindex indice de una columna
                                 manejarClickCarta(colIndex,c.getValor());
-                            }else if(event.getButton()==MouseButton.SECONDARY && cardIndex==cartas.size()-1){
+                            }else if(event.getButton()==MouseButton.SECONDARY&&cardIndex==cartas.size()-1){
                                 // Clic derecho en la carta superior intentar ir a Foundation
-                                //TABLERO A FOUNDATION
                                 game.moveTableauToFoundation(colIndex+1);
                                 selectionController.clearSelection();
-                                onCambio.run(); // foundation se refresca
+                                onCambio.run();
                             }
                         });
                     }
 
                     // Resaltamos la carta superior de la columna seleccionada
-                    if(selectionController.isTableauSelected() && selectionController.getTableauSeleccionado()==i && cardIndex==cartas.size()-1){
+                    if(selectionController.isTableauSelected()&&selectionController.getTableauSeleccionado()==i&&cardIndex==cartas.size()-1){
                         nodoCarta.setSeleccionada(true);
                     }
 
@@ -130,19 +140,16 @@ public class TableauView extends ScrollPane{
         if(selectionController.isWasteSelected()){
             game.moveWasteToTableau(colIndex+1);
             selectionController.clearSelection();
-            //ACTUALIZA
             onCambio.run();
             return;
         }
 
         // Si ya había una columna seleccionada, intentamos mover un bloque entre columnas
-        //ENTRE COLUMNAS
-        if(selectionController.isTableauSelected() && selectionController.getTableauSeleccionado()!=colIndex){
+        if(selectionController.isTableauSelected()&&selectionController.getTableauSeleccionado()!=colIndex){
             int origen=selectionController.getTableauSeleccionado()+1;
             int destino=colIndex+1;
             game.moveTableauToTableau(origen,destino);
             selectionController.clearSelection();
-            // se redibuja todo
             onCambio.run();
             return;
         }
@@ -157,9 +164,7 @@ public class TableauView extends ScrollPane{
     private void manejarClickEnColumnaVacia(int colIndex){
         int destino=colIndex+1;
 
-
-        //  Si el Waste está seleccionado, probamos mover Waste a la columna vacía. El modelo solo dejará entrar un Rey en una columna vacía.
-        //LLENA king
+        // Si el Waste está seleccionado, probamos mover Waste a la columna vacía
         if(selectionController.isWasteSelected()){
             game.moveWasteToTableau(destino);
             selectionController.clearSelection();
@@ -167,7 +172,7 @@ public class TableauView extends ScrollPane{
             return;
         }
 
-        // Si hay una columna seleccionada, intentamos mover bloque Tableau a la columna, si el bloque empieza en Rey, el modelo permitirá el movimiento.
+        // Si hay una columna seleccionada, intentamos mover bloque Tableau a la columna
         if(selectionController.isTableauSelected()){
             int origen=selectionController.getTableauSeleccionado()+1;
             game.moveTableauToTableau(origen,destino);
@@ -175,6 +180,5 @@ public class TableauView extends ScrollPane{
             onCambio.run();
             return;
         }
-
     }
 }

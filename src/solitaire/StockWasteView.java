@@ -35,6 +35,8 @@ public class StockWasteView extends HBox{
         setSpacing(20);
         setPadding(new Insets(15));
         setAlignment(Pos.TOP_LEFT);
+        setBackground(new Background(new BackgroundFill(Color.TRANSPARENT,CornerRadii.EMPTY,Insets.EMPTY)));
+        setStyle("-fx-background-color: transparent;");
 
         drawPane=crearSlotCarta(true,"DRAW");
         wastePane=crearSlotCarta(false,"WASTE");
@@ -48,24 +50,20 @@ public class StockWasteView extends HBox{
     private void configurarEventos(){
         drawPane.setOnMouseClicked(event->{
             if(event.getButton()!=MouseButton.PRIMARY)return;
-
             if(game.getDrawPile().hayCartas()){
-                // Robar cartas del mazo
                 game.drawCards();
             }else{
-                // Si no hay cartas en draw pero sí en waste, recargamos
                 if(game.getWastePile().verCarta()!=null){
                     game.reloadDrawPile();
                     game.drawCards();
                 }
             }
             selectionListener.onWasteDeselected();
-            onCambio.run();   // actualiza todo: draw, waste, tableau y foundations
+            onCambio.run();
         });
 
         wastePane.setOnMouseClicked(event->{
             if(event.getButton()==MouseButton.PRIMARY){
-                // Seleccionar o deseleccionar Waste
                 if(selectionListener.isWasteSelected()){
                     selectionListener.onWasteDeselected();
                 }else{
@@ -73,10 +71,9 @@ public class StockWasteView extends HBox{
                 }
                 onCambio.run();
             }else if(event.getButton()==MouseButton.SECONDARY){
-                // Intentar mover Waste a Foundation
                 game.moveWasteToFoundation();
                 selectionListener.onWasteDeselected();
-                onCambio.run();   // foundation se actualiza y muestra la carta
+                onCambio.run();
             }
         });
     }
@@ -114,21 +111,18 @@ public class StockWasteView extends HBox{
         }
     }
 
-    // Crea un hueco visual para una carta
+    // Crea un hueco visual para una carta (solo borde y texto)
     private StackPane crearSlotCarta(boolean draw,String textoGuia){
         StackPane slot=new StackPane();
         slot.setPrefSize(90,120);
         slot.setMaxSize(90,120);
         slot.setMinSize(90,120);
-
-        slot.setBorder(new Border(new BorderStroke(Color.rgb(250,250,250,0.85), BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(2))));
-        slot.setBackground(new Background(new BackgroundFill(Color.rgb(0,0,0,0.15), new CornerRadii(10), Insets.EMPTY)));
-
+        slot.setBorder(new Border(new BorderStroke(Color.rgb(250,250,250,0.85),BorderStrokeStyle.SOLID,new CornerRadii(10),new BorderWidths(2))));
+        slot.setBackground(new Background(new BackgroundFill(Color.rgb(0,0,0,0.15),new CornerRadii(10),Insets.EMPTY)));
         Label guia=new Label(textoGuia);
         guia.setTextFill(Color.rgb(230,230,230,0.8));
         guia.setStyle("-fx-font-size: 12px; -fx-font-weight: bold;");
         slot.getChildren().add(guia);
-
         if(draw)slot.setCursor(Cursor.HAND);
         return slot;
     }

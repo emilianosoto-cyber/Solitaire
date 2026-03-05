@@ -16,6 +16,8 @@ import java.io.FileNotFoundException;
 public class CardView extends StackPane{
     private final CartaInglesa carta;
     private static final String IMAGES_BASE_PATH="src/imagen/images/";
+    private final StackPane capaSeleccion=new StackPane();
+
 
     public CardView(CartaInglesa carta){
         this.carta=carta;
@@ -23,6 +25,16 @@ public class CardView extends StackPane{
         setMaxSize(90,120);
         setMinSize(90,120);
         dibujarCarta();
+
+        capaSeleccion.setPrefSize(90,120);
+        capaSeleccion.setMaxSize(90,120);
+        capaSeleccion.setMinSize(90,120);
+
+        capaSeleccion.setBackground(Background.EMPTY);
+        capaSeleccion.setBorder(null);
+
+        getChildren().add(capaSeleccion);
+
     }
 
     // Aquí decidimos qué imagen o texto mostrar para la carta
@@ -57,11 +69,9 @@ public class CardView extends StackPane{
     //BORDE DORADO.
     public void setSeleccionada(boolean seleccionada){
         if(seleccionada){
-            setBorder(new Border(new BorderStroke(
-                    Color.GOLD,BorderStrokeStyle.SOLID,
-                    new CornerRadii(10),new BorderWidths(3))));
+            capaSeleccion.setBorder(new Border(new BorderStroke(Color.GOLD,BorderStrokeStyle.SOLID, new CornerRadii(10),new BorderWidths(4))));
         }else{
-            setBorder(null);
+            capaSeleccion.setBorder(null);
         }
     }
 
