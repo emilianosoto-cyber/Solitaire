@@ -2,7 +2,9 @@ package solitaire;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import java.io.FileInputStream;
@@ -18,8 +20,10 @@ public class SolitaireGUI extends BorderPane implements StockWasteView.Selection
     private final FoundationView foundationView;    // vista de las foundations
     private final TableauView tableauView;          // vista de las 7 columnas
 
-    // Ruta donde están guardadas las imágenes
+    //Ruta donde están guardadas las imágenes
     private static final String IMAGES_BASE_PATH="src/imagen/images/";
+    //Ruta de la imagen del botón Undo
+    private static final String BUTTON_PATH="src/imagen/";
 
     // Variables de selección del jugador
     private boolean wasteSeleccionado=false;
@@ -56,11 +60,54 @@ public class SolitaireGUI extends BorderPane implements StockWasteView.Selection
         stockWasteView=new StockWasteView(game,this,this::actualizarTodo);
         foundationView=new FoundationView(game);
 
+        //Creamos el botón Undo
+        Button btnUndo=new Button();
+
+        try{
+
+            //imagen del botón desde la ruta indicada
+            Image imgRegresar=new Image(new FileInputStream(BUTTON_PATH+"regresar.png"));
+
+            //Creamos el ImageView y le damos un tamaño fijo al ícono
+            ImageView ivRegresar=new ImageView(imgRegresar);
+            ivRegresar.setFitWidth(50);
+            ivRegresar.setFitHeight(50);
+            ivRegresar.setPreserveRatio(true);
+
+            //Asignamos la imagen al botón
+            btnUndo.setGraphic(ivRegresar);
+
+        }catch(Exception e){
+            //Si no carga la imagen, el botón muestra texto como respaldo
+            btnUndo.setText("Deshacer");
+        }
+
+        // Quitamos el fondo y borde del botón para que solo se vea la imagen
+        btnUndo.setStyle(
+                "-fx-background-color: transparent;"+  // sin fondo
+                        "-fx-border-color: transparent;"+      // sin borde
+                        "-fx-cursor: hand;"+                   // cursor de mano al pasar
+                        "-fx-padding: 0;"                      // sin padding extra
+        );
+
+        //Cuando se da clic en UNDO el juego se deshace el último movimiento, se limpia cualquier carta seleccionada y se actualiza la pantalla
+        btnUndo.setOnAction(event->{
+
+            //deshace el último movimiento en el modelo
+            game.undo();
+            //limpiamos la selección visual
+            clearSelection();
+            //refrescamos toda la pantalla
+            actualizarTodo();
+
+        });
+
         // Región vacía para empujar foundations a la derecha
         Region separador=new Region();
         HBox.setHgrow(separador,Priority.ALWAYS);
 
-        topRow.getChildren().addAll(stockWasteView,separador,foundationView);
+        //se agrega btnUndo entre stockWasteView y el separador
+        topRow.getChildren().addAll(stockWasteView,btnUndo,separador,foundationView);
         setTop(topRow);
 
         tableauView=new TableauView(game,this,this::actualizarTodo);
