@@ -86,6 +86,28 @@ public class DrawPile {
         }
     }
 
+    //Método que regresa todas las cartas en una Arraylist
+    //guardamos el estado del juego antes de un movimiento
+    public ArrayList<CartaInglesa> getCartasComoLista() {
+
+        ArrayList<CartaInglesa> lista = new ArrayList<>();
+        //pila para no perder el orden original (pila temp.)
+        Pila<CartaInglesa> temp = new Pila<>();
+
+        //copiamos la pila original en una temporal
+        while (!cartas.isEmpty()){
+            temp.push(cartas.pop());
+        }
+
+        //devolvemos las cartas a la pila original y al mismo tiempo las agregamos a la lista
+        while (!temp.isEmpty()){
+            CartaInglesa carta = temp.pop();
+            cartas.push(carta);
+            lista.add(carta);
+        }
+        return lista;
+    }
+
     @Override
     public String toString() {
         if (cartas.isEmpty()) {
