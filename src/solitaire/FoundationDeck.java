@@ -3,11 +3,12 @@ package solitaire;
 import DeckOfCards.CartaInglesa;
 import DeckOfCards.Palo;
 
-import java.util.ArrayList;
-
 public class FoundationDeck {
+
     private Palo palo;
-    ArrayList<CartaInglesa> cartas = new ArrayList<>();
+
+    //Implementamos pilas (clase)
+    Pila<CartaInglesa> cartas = new Pila<>();
 
     public FoundationDeck(Palo palo) {
         this.palo = palo;
@@ -15,23 +16,28 @@ public class FoundationDeck {
 
     public FoundationDeck(CartaInglesa carta) {
         palo = carta.getPalo();
-        if (carta.getValorBajo() == 1) {
-            cartas.add(carta);
+        if (carta.getValorBajo() == 1){
+            //El push coloca el As en el tope
+            cartas.push(carta);
         }
     }
 
     public boolean agregarCarta(CartaInglesa carta) {
         boolean agregado = false;
+
         if (carta.tieneElMismoPalo(palo)) {
             if (cartas.isEmpty()) {
-                if (carta.getValorBajo() == 1) {
-                    cartas.add(carta);
+                if (carta.getValorBajo() == 1){
+                    //El push coloca el As en el tope de la pila vacía
+                    cartas.push(carta);
                     agregado = true;
                 }
             } else {
-                CartaInglesa ultimaCarta = cartas.getLast();
-                if (ultimaCarta.getValorBajo() + 1 == carta.getValorBajo()) {
-                    cartas.add(carta);
+                //ve carta sin quitar
+                CartaInglesa ultimaCarta = cartas.peek();
+                if (ultimaCarta.getValorBajo() + 1 == carta.getValorBajo()){
+                    //se apila una carta nueva encima de la que estaba anteriormente
+                    cartas.push(carta);
                     agregado = true;
                 }
             }
@@ -40,12 +46,8 @@ public class FoundationDeck {
     }
 
     CartaInglesa removerUltimaCarta() {
-        CartaInglesa ultimaCarta = null;
-        if (!cartas.isEmpty()) {
-            ultimaCarta = cartas.getLast();
-            cartas.remove(ultimaCarta);
-        }
-        return ultimaCarta;
+        //quita y regresa el tope en una fundacion
+        return cartas.pop();
     }
 
     @Override
@@ -54,8 +56,9 @@ public class FoundationDeck {
         if (cartas.isEmpty()) {
             builder.append("---");
         } else {
-            for (CartaInglesa carta : cartas) {
-                builder.append(carta.toString());
+            // El for-each funciona igual que nuestra pila
+            for (int i = 0; i < cartas.size(); i++){
+                builder.append(cartas.peek().toString());
             }
         }
         return builder.toString();
@@ -66,11 +69,8 @@ public class FoundationDeck {
     }
 
     public CartaInglesa getUltimaCarta() {
-        CartaInglesa ultimaCarta = null;
-        if (!cartas.isEmpty()) {
-            ultimaCarta = cartas.getLast();
-        }
-        return ultimaCarta;
+        //ve el tope - null si esta vacia
+        return cartas.peek();
     }
 
     public Palo getPalo() {
