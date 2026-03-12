@@ -81,13 +81,13 @@ public class SolitaireGame {
         return true;
     }
 
-    //M[etodo que indica si hay movimientos para deshacer
-    //mas qe nada es para habilitar en la gui el boton undo
+    //Método que indica si hay movimientos para deshacer
+    //más que nada es para habilitar en la gui el botón undo
     public boolean hayUndo() {
         return historial.hayMovimientos();
     }
 
-    //guardartestado (guarda estados antes de recargar, robar o se hizo un movimiento válido:))
+    //guardarEstado (guarda estados antes de recargar, robar o se hizo un movimiento válido:))
     public void reloadDrawPile() {
         guardarEstado();
         ArrayList<CartaInglesa> cards = wastePile.emptyPile();
@@ -114,7 +114,7 @@ public class SolitaireGame {
         CartaInglesa carta = wastePile.verCarta();
         if (carta != null && moveCartaToTableau(carta, tableau)){
             guardarEstado();
-            //Se ajusra el orden (guardar antes de cualquier cambio)
+            // Se ajusta el orden (guardar antes de cualquier cambio)
             wastePile.getCarta();
             movimientoRealizado = true;
         }
@@ -131,7 +131,6 @@ public class SolitaireGame {
             int valorQueDebeTenerLaCartaInicialDeLaFuente;
 
             if (!destino.isEmpty()){
-
                 CartaInglesa cartaUltimaDelDestino = destino.verUltimaCarta();
                 valorQueDebeTenerLaCartaInicialDeLaFuente = cartaUltimaDelDestino.getValor() - 1;
             } else {
@@ -142,7 +141,6 @@ public class SolitaireGame {
                     fuente.viewCardStartingAt(valorQueDebeTenerLaCartaInicialDeLaFuente);
 
             if (cartaInicialDePrueba != null && destino.sePuedeAgregarCarta(cartaInicialDePrueba)){
-
                 guardarEstado();
                 ArrayList<CartaInglesa> cartas = fuente.removeStartingAt(valorQueDebeTenerLaCartaInicialDeLaFuente);
 
@@ -157,26 +155,42 @@ public class SolitaireGame {
         return movimientoRealizado;
     }
 
+    // MODIFICADO: antes se quitaba la carta del tableau antes de validar
+    // ahora primero verificamos con getUltimaCarta() sin quitar,
+    // guardamos el estado, y solo entonces removemos del tableau
     public boolean moveTableauToFoundation(int numero) {
         boolean movimientoRealizado = false;
         TableauDeck fuente = tableau.get(numero - 1);
-        CartaInglesa carta = fuente.removerUltimaCarta();
+
+        // Verificamos si la carta puede ir a la foundation SIN quitarla todavía
+        CartaInglesa carta = fuente.getUltimaCarta();
+
         if (carta != null && moveCartaToFoundation(carta)) {
-            guardarEstado();
+            guardarEstado(); // guardamos ANTES de modificar el tableau ✅
+            fuente.removerUltimaCarta(); // ahora sí quitamos la carta del tableau
             movimientoRealizado = true;
-        } else if (carta != null) {
-            fuente.agregarCarta(carta);
         }
         return movimientoRealizado;
     }
 
+    //Se guarda antes cualquier modificación
     public boolean moveWasteToFoundation() {
         boolean movimientoRealizado = false;
         CartaInglesa carta = wastePile.verCarta();
-        if (carta != null && moveCartaToFoundation(carta)) {
+
+        if (carta != null) {
+
             guardarEstado();
-            wastePile.getCarta();
-            movimientoRealizado = true;
+
+            if (moveCartaToFoundation(carta)){
+
+                //ahora sí quitamos del waste
+                wastePile.getCarta();
+                movimientoRealizado = true;
+            } else {
+                //Si no se pudo mover, descartamos el estado que acabamos de guardar
+                historial.deshacer();
+            }
         }
         return movimientoRealizado;
     }
@@ -240,5 +254,4 @@ public class SolitaireGame {
     public ArrayList<FoundationDeck> getFoundations(){
         return foundation;
     }
-
 }
