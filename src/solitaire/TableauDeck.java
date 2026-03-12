@@ -156,6 +156,18 @@ public class TableauDeck {
     }
 
     public ArrayList<CartaInglesa> getCards() {
+
         return cartas;
     }
+
+    //Restaura la columna del tablero desde una lista guardaa
+    public void restaurar(ArrayList<CartaInglesa> lista){
+        //Vaciamos la columna actual
+        cartas.clear();
+
+        //Llenamos la columna con las cartas del estado anterior
+        //todo "addAll" copia todas las cartas de la lista a esta columna :)
+        cartas.addAll(lista);
+    }
+
 }
