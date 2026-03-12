@@ -54,6 +54,46 @@ public class WastePile {
         return cartas.pop();
     }
 
+    public boolean hayCartas() {
+        return !cartas.isEmpty();
+    }
+
+
+    //Regresa toddas las cartas como una lista
+    public ArrayList<CartaInglesa> getCartasComoLista(){
+
+        ArrayList<CartaInglesa> lista = new ArrayList<>();
+        //pila para no perder el orden original (pila temp.)
+        Pila<CartaInglesa> temp = new Pila<>();
+
+        //copiamos la pila original en una temporal
+        while (!cartas.isEmpty()){
+            temp.push(cartas.pop());
+        }
+
+        //devolvemos las cartas a la pila original y al mismo tiempo las agregamos a la lista
+        while (!temp.isEmpty()){
+
+            CartaInglesa carta = temp.pop();
+            cartas.push(carta);
+            lista.add(carta);
+        }
+
+        return lista;
+    }
+
+    //Restaura el wastePile desde una lista guardada. En caso de que se use Undo
+    public void restaurar(ArrayList<CartaInglesa> lista){
+        //Vaciamos la pila actual
+        cartas.clear();
+
+        //Agregamos carta por carta desde la lista guardada
+        for (CartaInglesa carta : lista){
+
+            cartas.push(carta);
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder stb = new StringBuilder();
@@ -68,7 +108,5 @@ public class WastePile {
         return stb.toString();
     }
 
-    public boolean hayCartas() {
-        return !cartas.isEmpty();
-    }
+
 }
