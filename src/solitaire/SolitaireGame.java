@@ -12,20 +12,90 @@ public class SolitaireGame {
     DrawPile drawPile;
     WastePile wastePile;
 
+    // LÍNEA AGREGADA: historial de movimientos para poder deshacer
+    // Cada vez que el jugador hace un movimiento válido,
+    // guardamos el estado anterior del juego aquí
+    private HistorialMovimientos historial = new HistorialMovimientos();
+
     public SolitaireGame() {
-        drawPile = new DrawPile();
+        drawPile  = new DrawPile();
         wastePile = new WastePile();
-        createTableaux();          // 28 cartas a los 7 tableaus
-        createFoundations();       // 4 foundations vacías
-        wastePile.addCartas(drawPile.retirarCartas());  // 3 cartas iniciales a waste
+        createTableaux();
+        createFoundations();
+        wastePile.addCartas(drawPile.retirarCartas());
     }
 
+    //Método para guardar el estado actual del juego
+    private void guardarEstado(){
+        //Copiamos las cartas del DrawPile
+        ArrayList<CartaInglesa> copyDraw = new ArrayList<>(drawPile.getCartasComoLista());
+
+        //Copiamos las cartas del WastePile
+        ArrayList<CartaInglesa> copyWaste = new ArrayList<>(wastePile.getCartasComoLista());
+
+        //Copiamos las 7 columnas del tableau
+        ArrayList<ArrayList<CartaInglesa>> copyTableau = new ArrayList<>();
+
+        for (TableauDeck col : tableau){
+            copyTableau.add(new ArrayList<>(col.getCards()));
+        }
+
+        //Copiamos las 4 foundations
+        ArrayList<ArrayList<CartaInglesa>> copyFoundations = new ArrayList<>();
+
+        for (FoundationDeck fd : foundation){
+            copyFoundations.add(new ArrayList<>(fd.getCartasComoLista()));
+        }
+
+        //Guardamos el estado en el historial
+        historial.guardar(new EstadoJuego(copyDraw, copyWaste, copyTableau, copyFoundations));
+    }
+
+    //Deshace el último movimiento. Lo que hace es que saca el estado anterior
+    //del historial y regresa el juego a ese estado
+    public boolean undo() {
+        //Si no hay movimientos guardados, no hay nada que deshacer
+        if (!historial.hayMovimientos()){
+            return false;
+        }
+
+        //Sacamos el estado anterior de la pila de historial
+        EstadoJuego estadoAnterior = historial.deshacer();
+
+        //regresamos el DrawPile con las cartas del estado anterior
+        drawPile.recargar(estadoAnterior.getDraw());
+
+        //regresamos el WastePile con las cartas del estado anterior
+        wastePile.restaurar(estadoAnterior.getWaste());
+
+        //regresamos las 7 columnas del tableau
+        for (int i = 0; i < tableau.size(); i++){
+            tableau.get(i).restaurar(estadoAnterior.getTableau().get(i));
+        }
+
+        //regresamos las 4 foundations
+        for (int i = 0; i < foundation.size(); i++){
+            foundation.get(i).restaurar(estadoAnterior.getFoundations().get(i));
+        }
+
+        return true;
+    }
+
+    //M[etodo que indica si hay movimientos para deshacer
+    //mas qe nada es para habilitar en la gui el boton undo
+    public boolean hayUndo() {
+        return historial.hayMovimientos();
+    }
+
+    //guardartestado (guarda estados antes de recargar, robar o se hizo un movimiento válido:))
     public void reloadDrawPile() {
+        guardarEstado();
         ArrayList<CartaInglesa> cards = wastePile.emptyPile();
         drawPile.recargar(cards);
     }
 
     public void drawCards() {
+        guardarEstado();
         ArrayList<CartaInglesa> cards = drawPile.retirarCartas();
         wastePile.addCartas(cards);
     }
@@ -41,10 +111,11 @@ public class SolitaireGame {
 
     public boolean moveWasteToTableau(TableauDeck tableau) {
         boolean movimientoRealizado = false;
-
         CartaInglesa carta = wastePile.verCarta();
-        if (carta != null && moveCartaToTableau(carta, tableau)) {
-            wastePile.getCarta();  // ahora sí la removemos
+        if (carta != null && moveCartaToTableau(carta, tableau)){
+            guardarEstado();
+            //Se ajusra el orden (guardar antes de cualquier cambio)
+            wastePile.getCarta();
             movimientoRealizado = true;
         }
         return movimientoRealizado;
@@ -52,12 +123,15 @@ public class SolitaireGame {
 
     public boolean moveTableauToTableau(int tableauFuente, int tableauDestino) {
         boolean movimientoRealizado = false;
-        TableauDeck fuente = tableau.get(tableauFuente - 1);
-        if (!fuente.isEmpty()) {
-            TableauDeck destino = tableau.get(tableauDestino - 1);
+        TableauDeck fuente  = tableau.get(tableauFuente - 1);
 
+        if (!fuente.isEmpty()){
+
+            TableauDeck destino = tableau.get(tableauDestino - 1);
             int valorQueDebeTenerLaCartaInicialDeLaFuente;
-            if (!destino.isEmpty()) {
+
+            if (!destino.isEmpty()){
+
                 CartaInglesa cartaUltimaDelDestino = destino.verUltimaCarta();
                 valorQueDebeTenerLaCartaInicialDeLaFuente = cartaUltimaDelDestino.getValor() - 1;
             } else {
@@ -66,11 +140,14 @@ public class SolitaireGame {
 
             CartaInglesa cartaInicialDePrueba =
                     fuente.viewCardStartingAt(valorQueDebeTenerLaCartaInicialDeLaFuente);
-            if (cartaInicialDePrueba != null && destino.sePuedeAgregarCarta(cartaInicialDePrueba)) {
-                ArrayList<CartaInglesa> cartas = fuente.removeStartingAt(
-                        valorQueDebeTenerLaCartaInicialDeLaFuente);
-                if (destino.agregarBloqueDeCartas(cartas)) {
-                    if (!fuente.isEmpty()) {
+
+            if (cartaInicialDePrueba != null && destino.sePuedeAgregarCarta(cartaInicialDePrueba)){
+
+                guardarEstado();
+                ArrayList<CartaInglesa> cartas = fuente.removeStartingAt(valorQueDebeTenerLaCartaInicialDeLaFuente);
+
+                if (destino.agregarBloqueDeCartas(cartas)){
+                    if (!fuente.isEmpty()){
                         fuente.verUltimaCarta().makeFaceUp();
                     }
                     movimientoRealizado = true;
@@ -82,13 +159,12 @@ public class SolitaireGame {
 
     public boolean moveTableauToFoundation(int numero) {
         boolean movimientoRealizado = false;
-
         TableauDeck fuente = tableau.get(numero - 1);
         CartaInglesa carta = fuente.removerUltimaCarta();
         if (carta != null && moveCartaToFoundation(carta)) {
+            guardarEstado();
             movimientoRealizado = true;
         } else if (carta != null) {
-            // regresar la carta al tableau porque no se puede hacer el movimiento
             fuente.agregarCarta(carta);
         }
         return movimientoRealizado;
@@ -96,10 +172,10 @@ public class SolitaireGame {
 
     public boolean moveWasteToFoundation() {
         boolean movimientoRealizado = false;
-
         CartaInglesa carta = wastePile.verCarta();
         if (carta != null && moveCartaToFoundation(carta)) {
-            wastePile.getCarta();   // quitarla del waste
+            guardarEstado();
+            wastePile.getCarta();
             movimientoRealizado = true;
         }
         return movimientoRealizado;
@@ -123,7 +199,7 @@ public class SolitaireGame {
                 gameOver = false;
             } else {
                 CartaInglesa ultimaCarta = f.getUltimaCarta();
-                if (ultimaCarta.getValor() != 13) { // no llegó al Rey
+                if (ultimaCarta.getValor() != 13) {
                     gameOver = false;
                 }
             }
@@ -145,23 +221,24 @@ public class SolitaireGame {
         }
     }
 
-    public DrawPile getDrawPile() {
+    public DrawPile getDrawPile(){
         return drawPile;
     }
 
-    public ArrayList<TableauDeck> getTableau() {
+    public ArrayList<TableauDeck> getTableau(){
         return tableau;
     }
 
-    public WastePile getWastePile() {
+    public WastePile getWastePile(){
         return wastePile;
     }
 
-    public FoundationDeck getLastFoundationUpdated() {
+    public FoundationDeck getLastFoundationUpdated(){
         return lastFoundationUpdated;
     }
 
-    public ArrayList<FoundationDeck> getFoundations() {
+    public ArrayList<FoundationDeck> getFoundations(){
         return foundation;
     }
+
 }
